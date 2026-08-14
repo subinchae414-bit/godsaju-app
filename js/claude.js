@@ -24,7 +24,7 @@ export async function streamMessage(systemPrompt, userPrompt, onChunk) {
     throw new ClaudeApiError("API 키가 설정되지 않았습니다. 설정 화면에서 Anthropic API 키를 입력해주세요.", 0);
   }
 
-  const res = await fetch(API_URL, {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
       "content-type": "application/json",
