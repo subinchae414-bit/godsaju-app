@@ -7,8 +7,4 @@
 // 실제 데이터 보호는 사용자가 입력하는 PIN(공간 식별자)이 담당합니다. 자세한 내용은 README.md 참고.
 
 export const SUPABASE_URL = "https://asgmpwwrsrdokhvayfpe.supabase.co";
-export const SUPABASE_ANON_KEY = "sb_publishable_xhnGJIAdiuafXHGsOfRxCw_87pMotjj";
-const SUPABASE_URL = "https://asgmpwwrsrdokhvayfpe.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_xhnGJIAdiuafXHGsOfrXCw_87pMotjj";
-
-export const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+export const SUPABASE_ANON_KEY = "sb_publishable_xhnGJIAdiuafXHGsOfrXCw_87pMotjj";
