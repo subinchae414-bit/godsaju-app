@@ -11,13 +11,6 @@ export class ClaudeApiError extends Error {
   }
 }
 
-export async function streamMessage(systemPrompt, userPrompt, onChunk) {
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    throw new ClaudeApiError("API 키가 설정되지 않았습니다.", 0);
-  }
-}
-
 /**
  * Claude에게 메시지를 보내고 텍스트 스트림을 받는다.
  * @param {string} systemPrompt
@@ -40,7 +33,7 @@ export async function streamMessage(systemPrompt, userPrompt, onChunk) {
       "anthropic-dangerous-direct-browser-access": "true",
     },
     body: JSON.stringify({
-      model: MODEL, // 변수 MODEL 사용
+      model: MODEL,
       max_tokens: 4096,
       system: systemPrompt,
       stream: true,
