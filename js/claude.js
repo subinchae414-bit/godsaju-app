@@ -2,7 +2,7 @@
 import { getApiKey } from "./storage.js";
 
 const API_URL = "https://api.anthropic.com/v1/messages";
-const MODEL = "claude-3-5-sonnet-20241022";
+const MODEL = "claude-sonnet-4-6";
 
 export class ClaudeApiError extends Error {
   constructor(message, status) {
