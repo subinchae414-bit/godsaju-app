@@ -33,7 +33,7 @@ export async function streamMessage(systemPrompt, userPrompt, onChunk) {
       "anthropic-dangerous-direct-browser-access": "true",
     },
     body: JSON.stringify({
-      model: MODEL,
+      model: "claude-3-5-sonnet-20241022",
       max_tokens: 4096,
       system: systemPrompt,
       stream: true,
