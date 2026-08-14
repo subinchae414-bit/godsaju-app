@@ -8,3 +8,7 @@
 
 export const SUPABASE_URL = "https://YOUR_PROJECT_REF.supabase.co";
 export const SUPABASE_ANON_KEY = "YOUR_ANON_PUBLIC_KEY";
+export const SUPABASE_URL = "https://asgmpwwrsrdokhvayfpe.supabase.co";
+export const SUPABASE_ANON_KEY = "sb_publishable_xhnGJIAdiuafXHGsOfrXCw_87pMotjj";
+const SUPABASE_URL = 'https://your-project.supabase.co';
+const SUPABASE_ANON_KEY = 'your-anon-key-here';
