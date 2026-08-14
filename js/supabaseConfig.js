@@ -6,9 +6,5 @@
 // 이 값들은 "공개되어도 되는" 키입니다 (Supabase의 anon key는 브라우저에 노출되는 것을 전제로 설계됨).
 // 실제 데이터 보호는 사용자가 입력하는 PIN(공간 식별자)이 담당합니다. 자세한 내용은 README.md 참고.
 
-export const SUPABASE_URL = "https://YOUR_PROJECT_REF.supabase.co";
-export const SUPABASE_ANON_KEY = "YOUR_ANON_PUBLIC_KEY";
 export const SUPABASE_URL = "https://asgmpwwrsrdokhvayfpe.supabase.co";
-export const SUPABASE_ANON_KEY = "sb_publishable_xhnGJIAdiuafXHGsOfrXCw_87pMotjj";
-const SUPABASE_URL = 'https://your-project.supabase.co';
-const SUPABASE_ANON_KEY = 'your-anon-key-here';
+export const SUPABASE_ANON_KEY = "sb_publishable_xhnGJIAdiuafXHGsOfRxCw_87pMotjj";
