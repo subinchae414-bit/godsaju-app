@@ -8,3 +8,7 @@
 
 export const SUPABASE_URL = "https://asgmpwwrsrdokhvayfpe.supabase.co";
 export const SUPABASE_ANON_KEY = "sb_publishable_xhnGJIAdiuafXHGsOfRxCw_87pMotjj";
+const SUPABASE_URL = "https://asgmpwwrsrdokhvayfpe.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_xhnGJIAdiuafXHGsOfrXCw_87pMotjj";
+
+export const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
