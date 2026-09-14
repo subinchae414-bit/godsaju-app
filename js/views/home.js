@@ -39,7 +39,10 @@ export async function renderHome(container) {
             .map(
               (p) => `
             <a class="person-row" href="#/person/${p.id}/saju" data-id="${p.id}">
-              <div class="person-avatar">${initial(p.name)}</div>
+              <div class="person-avatar-wrap">
+                <div class="person-avatar">${initial(p.name)}</div>
+                <div class="paw-badge">🐾</div>
+              </div>
               <div class="person-info">
                 <div class="person-name">${p.name}</div>
                 <div class="person-meta">${p.birthDate} · ${p.calendarType === "lunar" ? "음력" : "양력"}${
@@ -54,21 +57,52 @@ export async function renderHome(container) {
           )
           .join("");
 
+  const sajuHref = people.length > 0 ? `#/person/${people[0].id}/saju` : "#/person/new";
+
   container.innerHTML = `
     <div class="page">
-      <div class="section-title" style="margin-top:6px;">오늘의 사주</div>
-      <div class="card" style="margin-bottom:4px;">
-        <div style="font-size:14px;color:var(--text-dim);line-height:1.6;">
-          등록해둔 사람의 이름을 눌러 사주 풀이를 확인하고,<br/>
-          하단의 <strong style="color:var(--gold);">궁합</strong> 탭에서 두 사람의 궁합도 볼 수 있어요.
-        </div>
+      <div class="menu-grid">
+        <a class="menu-card menu-yellow" href="${sajuHref}" data-menu="saju">
+          <div class="menu-photo blob-a">🐶🕶️</div>
+          <div class="menu-title">사주 보기 <span class="menu-badge">🐾</span></div>
+          <div class="menu-desc">용하다고 소문난 댕댕이 사주</div>
+        </a>
+        <a class="menu-card menu-green" href="#/compat" data-menu="compat">
+          <div class="menu-photo blob-b">🐕🐩</div>
+          <div class="menu-title">궁합 보기 <span class="menu-badge">🐾</span></div>
+          <div class="menu-desc">우리 사이는 몇 점?</div>
+        </a>
+        <button type="button" class="menu-card menu-blue" data-toast="대운 풀이는 곧 만나요! 조금만 기다려주세요 🐶">
+          <div class="menu-photo blob-c">🐶🎩</div>
+          <div class="menu-title">대운 보기 <span class="menu-badge">🐾</span></div>
+          <div class="menu-desc">물 들어올 때 노 젓자</div>
+        </button>
+        <button type="button" class="menu-card menu-purple" data-toast="오늘의 운세는 곧 만나요! 조금만 기다려주세요 🐶">
+          <div class="menu-photo blob-d">🐶🎉</div>
+          <div class="menu-title">오늘의 운세 <span class="menu-badge">🐾</span></div>
+          <div class="menu-desc">오늘 하루는 어떨까?</div>
+        </button>
       </div>
+
+      <div class="section-title" style="margin-top:18px;">우리 아이들</div>
       ${listHtml}
     </div>
     <button class="fab" id="add-person-fab" aria-label="사람 추가">＋</button>
+    <div class="toast" id="home-toast"></div>
   `;
 
   container.querySelector("#add-person-fab").addEventListener("click", () => {
     location.hash = "#/person/new";
+  });
+
+  const toastEl = container.querySelector("#home-toast");
+  let toastTimer = null;
+  container.querySelectorAll("[data-toast]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      toastEl.textContent = btn.dataset.toast;
+      toastEl.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove("show"), 1800);
+    });
   });
 }

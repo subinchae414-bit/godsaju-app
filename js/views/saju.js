@@ -29,7 +29,10 @@ export async function renderSaju(container, params) {
     <div class="page">
       <a href="#/" class="back-link">‹ 목록으로</a>
       <div class="reading-header">
-        <div class="person-avatar">${initial(person.name)}</div>
+        <div class="person-avatar-wrap">
+          <div class="person-avatar">${initial(person.name)}</div>
+          <div class="paw-badge">🐾</div>
+        </div>
         <div class="person-info">
           <div class="person-name" style="font-size:17px;">${person.name}</div>
           <div class="person-meta">${person.birthDate} · ${person.calendarType === "lunar" ? "음력" : "양력"}${
