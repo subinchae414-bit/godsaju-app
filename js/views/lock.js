@@ -11,7 +11,7 @@ export function renderLock(container, onUnlock) {
   container.innerHTML = `
     <div class="page" style="padding-top:56px;">
       <div style="text-align:center;margin-bottom:26px;">
-        <div style="font-size:44px;">🔮</div>
+        <div style="font-size:48px;">🐶</div>
         <h2 style="margin:10px 0 6px;">사주풀이</h2>
         <div class="hint" style="font-size:13.5px;">
           가족·연인과 함께 쓸 PIN(비밀번호)을 입력하세요.<br/>

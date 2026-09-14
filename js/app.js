@@ -48,7 +48,7 @@ function renderTopbar() {
   return `
     <div class="topbar">
       <a class="brand" href="#/">
-        <span class="mark">🔮</span>
+        <span class="mark">🐶</span>
         <span>사주풀이</span>
       </a>
       <a class="icon-btn" href="#/settings" title="설정">⚙️</a>
