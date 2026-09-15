@@ -555,6 +555,74 @@ button {
   flex-shrink: 0;
 }
 
+/* ---------- Bazi (만세력) card ---------- */
+
+.bazi-card {
+  margin-top: 14px;
+}
+
+.pillar-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.pillar-cell {
+  background: var(--bg-elevated);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 4px;
+  text-align: center;
+}
+
+.pillar-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-faint);
+  margin-bottom: 4px;
+}
+
+.pillar-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pillar-value.pillar-empty {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-faint);
+}
+
+.pillar-hanja {
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-top: 2px;
+}
+
+.wx-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.wx-chip {
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 2px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-dim);
+}
+
+.wx-목 { border-color: var(--pastel-green-deep); background: var(--pastel-green); color: #2f6a41; }
+.wx-화 { border-color: var(--pastel-pink-deep); background: var(--pastel-pink); color: #b43e63; }
+.wx-토 { border-color: var(--pastel-peach-deep); background: var(--pastel-peach); color: #a5601e; }
+.wx-금 { border-color: var(--pastel-yellow-deep); background: var(--pastel-yellow); color: #9a7a0a; }
+.wx-수 { border-color: var(--pastel-blue-deep); background: var(--pastel-blue); color: #2f6a9a; }
+
 /* ---------- Reading output ---------- */
 
 .reading {

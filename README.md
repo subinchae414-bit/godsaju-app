@@ -112,7 +112,7 @@ python3 -m http.server 8000
 ## 폴더 구조
 
 ```
-index.html               진입점 (Supabase JS 라이브러리 CDN 로드)
+index.html               진입점 (Supabase JS 라이브러리, 만세력 라이브러리 CDN/로컬 로드)
 css/style.css              전체 스타일
 js/app.js                   해시 기반 라우터 + PIN 잠금 게이트
 js/space.js                 PIN → 공간 식별자(space_id) 파생/저장
@@ -120,8 +120,10 @@ js/supabaseConfig.js        Supabase 프로젝트 URL/anon key (직접 입력 �
 js/supabaseClient.js        Supabase 클라이언트 생성
 js/storage.js               사람/캐시 데이터 CRUD (Supabase), API 키(로컬)
 js/claude.js                 Claude API 스트리밍 호출
-js/prompts.js                사주/궁합 프롬프트 생성
+js/sajuCalc.js                만세력(vendor/lunar.js) 기반 사주 간지 정밀 계산
+js/prompts.js                사주/궁합 프롬프트 생성 (계산된 간지를 그대로 전달)
 js/markdown.js                마크다운 → HTML 변환
+js/vendor/lunar.js            사주/음력 계산 라이브러리 (lunar-javascript, MIT, 자체 호스팅)
 js/views/lock.js              PIN 입력(잠금) 화면
 js/views/home.js              홈(사람 목록)
 js/views/personForm.js        사람 추가/수정
@@ -134,4 +136,5 @@ js/views/settings.js          API 키 설정 / 공간 전환
 
 - 사람 프로필, 사주/궁합 풀이 결과: Supabase에 저장되며, 같은 PIN을 아는 모든 기기에서 공유됩니다.
 - Anthropic API 키: 각 브라우저의 `localStorage`에만 저장되고 동기화되지 않습니다.
-- 사주/궁합 해석은 정확한 만세력 계산이 아닌 Claude(`claude-opus-5`)의 AI 해석이므로 참고용으로만 활용하세요.
+- 연주/월주/일주/시주(간지)는 `js/vendor/lunar.js`(만세력 라이브러리, 절기·율리우스일 기반)로 정밀 계산되며, Claude(`claude-opus-5`)는 이 계산된 간지를 바탕으로 해석 글만 작성합니다. 다만 성격·강점 등 해석 자체는 AI가 작성한 참고용 콘텐츠입니다.
+- 음력(윤달) 생일은 현재 평달만 지원해요. 윤달에 태어난 분은 정확한 간지가 아닐 수 있습니다.
