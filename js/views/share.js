@@ -5,6 +5,7 @@
 import { getPerson, getCachedReading } from "../storage.js";
 import { renderMarkdown } from "../markdown.js";
 import { computeBazi } from "../sajuCalc.js";
+import { setSpaceId } from "../space.js";
 
 function initial(name) {
   return name?.trim()?.[0] || "?";
@@ -43,25 +44,35 @@ function renderBaziCard(bazi) {
 function renderShell(bodyHtml) {
   return `
     <div class="topbar">
-      <a class="brand" href="#/">
+      <a class="brand" href="#/" data-fresh-start>
         <span class="mark">🐶</span>
         <span>사주풀이</span>
       </a>
     </div>
     <div class="page">
       ${bodyHtml}
-      <a href="#/" class="card" style="display:block;margin-top:22px;text-align:center;">
+      <a href="#/" class="card" style="display:block;margin-top:22px;text-align:center;" data-fresh-start>
         <strong style="color:var(--gold);">🐾 나도 사주풀이 받아보기 →</strong>
       </a>
     </div>
   `;
 }
 
+// 공유 페이지에서 벗어나 본 앱으로 갈 때는, 이 기기에 다른 사람(원 소유자)의 space가
+// 이미 잠금 해제되어 있어도 그 기록을 그대로 보여주지 않고 PIN 입력부터 다시 시작한다.
+// (같은 PIN을 다시 입력하면 즉시 원래 공간으로 복귀하므로 데이터 손실은 없다.)
+function setShell(container, bodyHtml) {
+  container.innerHTML = renderShell(bodyHtml);
+  container.querySelectorAll("[data-fresh-start]").forEach((el) => {
+    el.addEventListener("click", () => setSpaceId(""));
+  });
+}
+
 export async function renderShare(container, { spaceId, personId }) {
-  container.innerHTML = renderShell(`<div class="loading-row"><div class="spinner"></div> 불러오는 중...</div>`);
+  setShell(container, `<div class="loading-row"><div class="spinner"></div> 불러오는 중...</div>`);
 
   if (!spaceId || !personId) {
-    container.innerHTML = renderShell(`<div class="error-box">공유 링크가 올바르지 않아요.</div>`);
+    setShell(container, `<div class="error-box">공유 링크가 올바르지 않아요.</div>`);
     return;
   }
 
@@ -69,12 +80,12 @@ export async function renderShare(container, { spaceId, personId }) {
   try {
     person = await getPerson(personId, spaceId);
   } catch (err) {
-    container.innerHTML = renderShell(`<div class="error-box">${err?.message || "풀이를 불러오지 못했어요."}</div>`);
+    setShell(container, `<div class="error-box">${err?.message || "풀이를 불러오지 못했어요."}</div>`);
     return;
   }
 
   if (!person) {
-    container.innerHTML = renderShell(`<div class="empty-state">공유된 사주를 찾을 수 없어요.<br/>링크가 만료됐거나 삭제된 프로필일 수 있어요.</div>`);
+    setShell(container, `<div class="empty-state">공유된 사주를 찾을 수 없어요.<br/>링크가 만료됐거나 삭제된 프로필일 수 있어요.</div>`);
     return;
   }
 
@@ -82,7 +93,7 @@ export async function renderShare(container, { spaceId, personId }) {
   try {
     cached = await getCachedReading(`saju:${personId}`, spaceId);
   } catch (err) {
-    container.innerHTML = renderShell(`<div class="error-box">${err?.message || "풀이를 불러오지 못했어요."}</div>`);
+    setShell(container, `<div class="error-box">${err?.message || "풀이를 불러오지 못했어요."}</div>`);
     return;
   }
 
@@ -107,5 +118,5 @@ export async function renderShare(container, { spaceId, personId }) {
     ? `<div class="reading">${renderMarkdown(cached.text)}</div>`
     : `<div class="empty-state">아직 저장된 풀이가 없어요.<br/>원본 페이지에서 먼저 사주 풀이를 확인한 뒤 다시 공유해주세요.</div>`;
 
-  container.innerHTML = renderShell(header + renderBaziCard(bazi) + body);
+  setShell(container, header + renderBaziCard(bazi) + body);
 }
