@@ -740,8 +740,8 @@ button {
 
 .score-heart {
   position: relative;
-  width: 132px;
-  height: 132px;
+  width: 168px;
+  height: 168px;
   margin: 0 auto;
 }
 
@@ -758,8 +758,8 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  transform: translateY(4px);
-  font-size: 21px;
+  transform: translateY(10px);
+  font-size: 32px;
   font-weight: 800;
   color: #ffffff;
   text-shadow: 0 1px 3px rgba(180, 40, 80, 0.55);
