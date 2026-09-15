@@ -3,6 +3,7 @@ import { streamMessage, ClaudeApiError } from "../claude.js";
 import { buildPersonalPrompt } from "../prompts.js";
 import { renderMarkdown } from "../markdown.js";
 import { computeBazi } from "../sajuCalc.js";
+import { getSpaceId } from "../space.js";
 
 function initial(name) {
   return name?.trim()?.[0] || "?";
@@ -82,8 +83,10 @@ export async function renderSaju(container, params) {
       <div id="reading-area"></div>
       <div class="row-actions" id="regen-row" style="display:none;">
         <button class="btn btn-ghost" id="regen-btn">다시 풀이하기</button>
+        <button class="btn btn-secondary" id="share-btn" style="display:none;">🐾 공유 링크 복사</button>
       </div>
     </div>
+    <div class="toast" id="saju-toast"></div>
   `;
 
   container.querySelector("#edit-btn").addEventListener("click", () => {
@@ -93,8 +96,41 @@ export async function renderSaju(container, params) {
   const area = container.querySelector("#reading-area");
   const regenRow = container.querySelector("#regen-row");
   const regenBtn = container.querySelector("#regen-btn");
+  const shareBtn = container.querySelector("#share-btn");
+  const toastEl = container.querySelector("#saju-toast");
 
   regenBtn.addEventListener("click", () => runReading());
+
+  shareBtn.addEventListener("click", async () => {
+    const spaceId = getSpaceId();
+    const shareUrl = `${location.origin}${location.pathname}#/share/${spaceId}/${person.id}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `${person.name}님의 사주풀이`, url: shareUrl });
+        return;
+      } catch {
+        /* 공유 취소 등은 무시하고 클립보드 복사로 대체 */
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      showToast("링크가 복사됐어요! 🐾");
+    } catch {
+      showToast(shareUrl);
+    }
+  });
+
+  function showToast(text) {
+    toastEl.textContent = text;
+    toastEl.classList.add("show");
+    setTimeout(() => toastEl.classList.remove("show"), 2000);
+  }
+
+  function setHasReading(hasReading) {
+    shareBtn.style.display = hasReading ? "inline-flex" : "none";
+  }
 
   area.innerHTML = `<div class="loading-row"><div class="spinner"></div> 저장된 풀이를 확인하고 있어요...</div>`;
   let cached = null;
@@ -106,13 +142,15 @@ export async function renderSaju(container, params) {
 
   if (cached) {
     area.innerHTML = `<div class="reading">${renderMarkdown(cached.text)}</div>`;
-    regenRow.style.display = "block";
+    regenRow.style.display = "flex";
+    setHasReading(true);
   } else {
     runReading();
   }
 
   async function runReading() {
     regenRow.style.display = "none";
+    setHasReading(false);
     area.innerHTML = `<div class="loading-row"><div class="spinner"></div> 사주를 풀이하고 있어요...</div>`;
 
     let acc = "";
@@ -129,11 +167,13 @@ export async function renderSaju(container, params) {
       } catch {
         /* 캐시 저장 실패는 조용히 넘어간다 (풀이 자체는 이미 화면에 표시됨) */
       }
-      regenRow.style.display = "block";
+      regenRow.style.display = "flex";
+      setHasReading(true);
     } catch (err) {
       const message = err instanceof ClaudeApiError ? err.message : err?.message || "알 수 없는 오류가 발생했습니다.";
       area.innerHTML = `<div class="error-box">${message}</div>`;
-      regenRow.style.display = "block";
+      regenRow.style.display = "flex";
+      setHasReading(false);
     }
   }
 }

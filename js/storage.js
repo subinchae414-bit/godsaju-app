@@ -7,8 +7,9 @@ import { getSpaceId } from "./space.js";
 
 export const RELATIONS = ["본인", "가족", "연인", "친구"];
 
-function requireSpace() {
-  const spaceId = getSpaceId();
+// override: 공유 링크(share 뷰)처럼 이 기기가 잠금 해제하지 않은 space_id를 직접 조회할 때 사용.
+function requireSpace(override) {
+  const spaceId = override || getSpaceId();
   if (!spaceId) {
     throw new Error("잠금이 해제되지 않았어요. 처음 화면에서 PIN을 입력해주세요.");
   }
@@ -42,8 +43,8 @@ export async function getPeople() {
   return (data || []).map(rowToPerson);
 }
 
-export async function getPerson(id) {
-  const spaceId = requireSpace();
+export async function getPerson(id, spaceIdOverride) {
+  const spaceId = requireSpace(spaceIdOverride);
   const sb = getSupabase();
   const { data, error } = await sb
     .from("people")
@@ -129,8 +130,8 @@ export function setApiKey(key) {
 
 // ---------- 사주/궁합 해석 캐시 (공간 공유) ----------
 
-export async function getCachedReading(key) {
-  const spaceId = requireSpace();
+export async function getCachedReading(key, spaceIdOverride) {
+  const spaceId = requireSpace(spaceIdOverride);
   const sb = getSupabase();
   const { data, error } = await sb
     .from("readings")
