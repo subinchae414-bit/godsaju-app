@@ -2,9 +2,43 @@ import { getPerson, getCachedReading, setCachedReading } from "../storage.js";
 import { streamMessage, ClaudeApiError } from "../claude.js";
 import { buildPersonalPrompt } from "../prompts.js";
 import { renderMarkdown } from "../markdown.js";
+import { computeBazi } from "../sajuCalc.js";
 
 function initial(name) {
   return name?.trim()?.[0] || "?";
+}
+
+function pillarCell(label, p) {
+  if (!p) return `<div class="pillar-cell"><div class="pillar-label">${label}</div><div class="pillar-value pillar-empty">시각 모름</div></div>`;
+  return `
+    <div class="pillar-cell">
+      <div class="pillar-label">${label}</div>
+      <div class="pillar-value">${p.ganZhiKo}</div>
+      <div class="pillar-hanja">${p.ganZhiHanja}</div>
+    </div>`;
+}
+
+function renderBaziCard(bazi) {
+  if (!bazi.ok) {
+    return `<div class="error-box" style="margin-top:14px;">${bazi.error}</div>`;
+  }
+  const { pillars, wuxingCount, zodiac } = bazi;
+  const wx = Object.entries(wuxingCount)
+    .map(([k, v]) => `<span class="wx-chip wx-${k}">${k} ${v}</span>`)
+    .join("");
+
+  return `
+    <div class="card bazi-card">
+      <div class="section-title" style="margin:0 0 10px;">만세력 사주 조견표 🐾</div>
+      <div class="pillar-grid">
+        ${pillarCell("연주", pillars.year)}
+        ${pillarCell("월주", pillars.month)}
+        ${pillarCell("일주", pillars.day)}
+        ${pillarCell("시주", pillars.time)}
+      </div>
+      <div class="wx-row">${wx}</div>
+      <div class="hint" style="margin-top:8px;">${zodiac}띠 · 아래 해석은 이 간지를 바탕으로 작성돼요.</div>
+    </div>`;
 }
 
 export async function renderSaju(container, params) {
@@ -24,6 +58,7 @@ export async function renderSaju(container, params) {
   }
 
   const cacheKey = `saju:${person.id}`;
+  const bazi = computeBazi(person);
 
   container.innerHTML = `
     <div class="page">
@@ -41,6 +76,8 @@ export async function renderSaju(container, params) {
         </div>
         <button class="icon-btn" id="edit-btn" title="수정">✎</button>
       </div>
+
+      ${renderBaziCard(bazi)}
 
       <div id="reading-area"></div>
       <div class="row-actions" id="regen-row" style="display:none;">
@@ -79,9 +116,9 @@ export async function renderSaju(container, params) {
     area.innerHTML = `<div class="loading-row"><div class="spinner"></div> 사주를 풀이하고 있어요...</div>`;
 
     let acc = "";
-    const { system, user } = buildPersonalPrompt(person);
 
     try {
+      const { system, user } = buildPersonalPrompt(person);
       await streamMessage(system, user, (chunk) => {
         acc += chunk;
         area.innerHTML = `<div class="reading">${renderMarkdown(acc)}<span class="cursor-blink"></span></div>`;

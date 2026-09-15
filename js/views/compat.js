@@ -2,6 +2,34 @@ import { getPeople, getCachedReading, setCachedReading } from "../storage.js";
 import { streamMessage, ClaudeApiError } from "../claude.js";
 import { buildCompatibilityPrompt } from "../prompts.js";
 import { renderMarkdown } from "../markdown.js";
+import { computeBazi } from "../sajuCalc.js";
+
+function pillarCell(label, p) {
+  if (!p) return `<div class="pillar-cell"><div class="pillar-label">${label}</div><div class="pillar-value pillar-empty">시각 모름</div></div>`;
+  return `
+    <div class="pillar-cell">
+      <div class="pillar-label">${label}</div>
+      <div class="pillar-value">${p.ganZhiKo}</div>
+      <div class="pillar-hanja">${p.ganZhiHanja}</div>
+    </div>`;
+}
+
+function renderBaziMini(name, bazi) {
+  if (!bazi.ok) {
+    return `<div class="error-box" style="margin-top:10px;">${name}: ${bazi.error}</div>`;
+  }
+  const { pillars, zodiac } = bazi;
+  return `
+    <div class="card bazi-card" style="margin-top:10px;">
+      <div class="section-title" style="margin:0 0 10px;">${name}의 사주 (${zodiac}띠) 🐾</div>
+      <div class="pillar-grid">
+        ${pillarCell("연주", pillars.year)}
+        ${pillarCell("월주", pillars.month)}
+        ${pillarCell("일주", pillars.day)}
+        ${pillarCell("시주", pillars.time)}
+      </div>
+    </div>`;
+}
 
 export async function renderCompat(container) {
   container.innerHTML = `<div class="page"><div class="loading-row"><div class="spinner"></div> 불러오는 중...</div></div>`;
@@ -49,6 +77,7 @@ export async function renderCompat(container) {
       <button class="btn btn-primary" id="c-run">궁합 보기</button>
 
       <div id="c-error" class="error-box" style="display:none;"></div>
+      <div id="c-bazi"></div>
       <div id="c-area"></div>
       <div class="row-actions" id="c-regen-row" style="display:none;">
         <button class="btn btn-ghost" id="c-regen-btn">다시 풀이하기</button>
@@ -60,6 +89,7 @@ export async function renderCompat(container) {
   const selB = container.querySelector("#c-b");
   const runBtn = container.querySelector("#c-run");
   const area = container.querySelector("#c-area");
+  const baziArea = container.querySelector("#c-bazi");
   const errorBox = container.querySelector("#c-error");
   const regenRow = container.querySelector("#c-regen-row");
   const regenBtn = container.querySelector("#c-regen-btn");
@@ -83,6 +113,8 @@ export async function renderCompat(container) {
     const personB = people.find((p) => p.id === idB);
     const cacheKey = `compat:${[idA, idB].sort().join("_")}`;
 
+    baziArea.innerHTML = renderBaziMini(personA.name, computeBazi(personA)) + renderBaziMini(personB.name, computeBazi(personB));
+
     if (!forceRegen) {
       area.innerHTML = `<div class="loading-row"><div class="spinner"></div> 저장된 궁합을 확인하고 있어요...</div>`;
       let cached = null;
@@ -105,9 +137,9 @@ export async function renderCompat(container) {
     area.innerHTML = `<div class="loading-row"><div class="spinner"></div> 두 분의 궁합을 살펴보고 있어요...</div>`;
 
     let acc = "";
-    const { system, user } = buildCompatibilityPrompt(personA, personB);
 
     try {
+      const { system, user } = buildCompatibilityPrompt(personA, personB);
       await streamMessage(system, user, (chunk) => {
         acc += chunk;
         area.innerHTML = `<div class="reading">${renderMarkdown(acc)}<span class="cursor-blink"></span></div>`;
@@ -134,6 +166,10 @@ export async function renderCompat(container) {
   }
 
   async function showCachedIfAny(idA, idB) {
+    const personA = people.find((p) => p.id === idA);
+    const personB = people.find((p) => p.id === idB);
+    baziArea.innerHTML = renderBaziMini(personA.name, computeBazi(personA)) + renderBaziMini(personB.name, computeBazi(personB));
+
     const cacheKey = `compat:${[idA, idB].sort().join("_")}`;
     try {
       const cached = await getCachedReading(cacheKey);
