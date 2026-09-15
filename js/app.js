@@ -4,6 +4,7 @@ import { renderSaju } from "./views/saju.js";
 import { renderCompat } from "./views/compat.js";
 import { renderSettings } from "./views/settings.js";
 import { renderLock } from "./views/lock.js";
+import { renderShare } from "./views/share.js";
 import { getApiKey } from "./storage.js";
 import { getSpaceId } from "./space.js";
 
@@ -69,6 +70,18 @@ function ensureApiKeyBanner() {
 }
 
 async function route() {
+  const segments = parseHash();
+
+  // 공유 링크(#/share/:spaceId/:personId)는 PIN 잠금과 무관하게 누구나 볼 수 있어야 한다.
+  if (segments[0] === "share") {
+    appEl.innerHTML = "";
+    const shareHost = document.createElement("div");
+    appEl.appendChild(shareHost);
+    await renderShare(shareHost, { spaceId: segments[1], personId: segments[2] });
+    window.scrollTo(0, 0);
+    return;
+  }
+
   if (!getSpaceId()) {
     appEl.innerHTML = "";
     const lockHost = document.createElement("div");
@@ -77,7 +90,6 @@ async function route() {
     return;
   }
 
-  const segments = parseHash();
   const [first, second, third] = segments;
 
   const shell = document.createElement("div");
