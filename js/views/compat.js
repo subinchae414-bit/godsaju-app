@@ -14,6 +14,30 @@ function pillarCell(label, p) {
     </div>`;
 }
 
+function extractScore(text) {
+  const m = text.match(/궁합\s*점수\s*[:：]\s*(\d{1,3})\s*점?/);
+  if (!m) return null;
+  const score = Math.max(0, Math.min(100, Number(m[1])));
+  const rest = (text.slice(0, m.index) + text.slice(m.index + m[0].length)).replace(/^\s+/, "");
+  return { score, rest };
+}
+
+function renderReadingWithScore(rawText, { streaming } = {}) {
+  const parsed = extractScore(rawText);
+  const bodyText = parsed ? parsed.rest : rawText;
+  const heartHtml = parsed
+    ? `<div class="score-section">
+        <div class="score-label">💘 우리 궁합 점수</div>
+        <div class="score-heart">
+          <div class="score-heart-shape"></div>
+          <div class="score-heart-text">${parsed.score}%</div>
+        </div>
+      </div>`
+    : "";
+  const cursor = streaming ? `<span class="cursor-blink"></span>` : "";
+  return `${heartHtml}<div class="reading">${renderMarkdown(bodyText)}${cursor}</div>`;
+}
+
 function renderBaziMini(name, bazi) {
   if (!bazi.ok) {
     return `<div class="error-box" style="margin-top:10px;">${name}: ${bazi.error}</div>`;
@@ -124,7 +148,7 @@ export async function renderCompat(container) {
         /* 무시하고 새로 풀이 */
       }
       if (cached) {
-        area.innerHTML = `<div class="reading">${renderMarkdown(cached.text)}</div>`;
+        area.innerHTML = renderReadingWithScore(cached.text);
         regenRow.style.display = "block";
         return;
       }
@@ -142,9 +166,9 @@ export async function renderCompat(container) {
       const { system, user } = buildCompatibilityPrompt(personA, personB);
       await streamMessage(system, user, (chunk) => {
         acc += chunk;
-        area.innerHTML = `<div class="reading">${renderMarkdown(acc)}<span class="cursor-blink"></span></div>`;
+        area.innerHTML = renderReadingWithScore(acc, { streaming: true });
       });
-      area.innerHTML = `<div class="reading">${renderMarkdown(acc)}</div>`;
+      area.innerHTML = renderReadingWithScore(acc);
       try {
         await setCachedReading(cacheKey, acc);
       } catch {
@@ -174,7 +198,7 @@ export async function renderCompat(container) {
     try {
       const cached = await getCachedReading(cacheKey);
       if (cached) {
-        area.innerHTML = `<div class="reading">${renderMarkdown(cached.text)}</div>`;
+        area.innerHTML = renderReadingWithScore(cached.text);
         regenRow.style.display = "block";
       }
     } catch {
