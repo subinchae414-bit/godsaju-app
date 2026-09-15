@@ -19,6 +19,30 @@ function pillarCell(label, p) {
     </div>`;
 }
 
+function injectReadingDogs(area) {
+  const reading = area.querySelector(".reading");
+  if (!reading) return;
+
+  const strengthHeading = Array.from(reading.querySelectorAll("h1, h2, h3")).find((el) => el.textContent.trim().includes("강점"));
+  if (strengthHeading) {
+    strengthHeading.insertAdjacentHTML(
+      "afterend",
+      `<div class="reading-dog-card">
+        <img src="./img/dogs/strength.jpg" alt="강점 마스코트 강아지" />
+        <div class="reading-dog-caption">이게 바로 너의 타고난 강점이야! 🐾</div>
+      </div>`
+    );
+  }
+
+  reading.insertAdjacentHTML(
+    "beforeend",
+    `<div class="reading-dog-card reading-dog-closing">
+      <img src="./img/dogs/encourage.jpg" alt="응원하는 마스코트 강아지" />
+      <div class="reading-dog-caption">여기까지가 오늘의 풀이야. 무슨 일이 있어도 힘내멍! 🐾</div>
+    </div>`
+  );
+}
+
 function renderBaziCard(bazi) {
   if (!bazi.ok) {
     return `<div class="error-box" style="margin-top:14px;">${bazi.error}</div>`;
@@ -142,6 +166,7 @@ export async function renderSaju(container, params) {
 
   if (cached) {
     area.innerHTML = `<div class="reading">${renderMarkdown(cached.text)}</div>`;
+    injectReadingDogs(area);
     regenRow.style.display = "flex";
     setHasReading(true);
   } else {
@@ -162,6 +187,7 @@ export async function renderSaju(container, params) {
         area.innerHTML = `<div class="reading">${renderMarkdown(acc)}<span class="cursor-blink"></span></div>`;
       });
       area.innerHTML = `<div class="reading">${renderMarkdown(acc)}</div>`;
+      injectReadingDogs(area);
       try {
         await setCachedReading(cacheKey, acc);
       } catch {

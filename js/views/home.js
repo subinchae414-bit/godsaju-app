@@ -62,7 +62,7 @@ export async function renderHome(container) {
   container.innerHTML = `
     <div class="page">
       <div class="hero-card">
-        <div class="hero-photo"><img src="./img/dogs/main.webp" alt="사주풀이 마스코트 강아지" /></div>
+        <div class="hero-photo"><img src="./img/dogs/main.jpg" alt="사주풀이 마스코트 강아지" /></div>
         <div class="hero-text">
           <div class="hero-title">오늘도 왔구나 멍! 🐾</div>
           <div class="hero-desc">우리 댕댕이가 봐주는 사주, 한번 볼까?</div>
@@ -80,18 +80,15 @@ export async function renderHome(container) {
           <div class="menu-title">궁합 보기 <span class="menu-badge">🐾</span></div>
           <div class="menu-desc">우리 사이는 몇 점?</div>
         </a>
-        <button type="button" class="menu-card menu-blue" data-toast="오늘 하루도 네가 최고야! 🐾">
-          <div class="menu-photo blob-c">
-            <img src="./img/dogs/strength.jpg" alt="내 사주 강점" />
-            <div class="speech-bubble">넌 최고야멍</div>
-          </div>
-          <div class="menu-title">내 사주 강점 <span class="menu-badge">🐾</span></div>
-          <div class="menu-desc">내가 타고난 장점은 뭘까?</div>
+        <button type="button" class="menu-card menu-blue" data-toast="대운 풀이는 곧 만나요! 조금만 기다려주세요 🐶">
+          <div class="menu-photo blob-c">🐶🎩</div>
+          <div class="menu-title">대운 보기 <span class="menu-badge">🐾</span></div>
+          <div class="menu-desc">물 들어올 때 노 젓자</div>
         </button>
-        <button type="button" class="menu-card menu-purple" data-toast="넌 이미 충분히 잘하고 있어! 오늘도 파이팅 🐾">
-          <div class="menu-photo blob-d"><img src="./img/dogs/encourage.jpg" alt="사주적으로 힘이 되는 말" /></div>
-          <div class="menu-title">힘이 되는 말 <span class="menu-badge">🐾</span></div>
-          <div class="menu-desc">지금처럼만 하면 돼멍</div>
+        <button type="button" class="menu-card menu-purple" data-toast="오늘의 운세는 곧 만나요! 조금만 기다려주세요 🐶">
+          <div class="menu-photo blob-d">🐶🎉</div>
+          <div class="menu-title">오늘의 운세 <span class="menu-badge">🐾</span></div>
+          <div class="menu-desc">오늘 하루는 어떨까?</div>
         </button>
       </div>
 
