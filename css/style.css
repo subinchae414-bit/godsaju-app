@@ -758,7 +758,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  transform: translateY(10px);
+  transform: translateY(-10px);
   font-size: 46px;
   font-weight: 800;
   color: #ffffff;
