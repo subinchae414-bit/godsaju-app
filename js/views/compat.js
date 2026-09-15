@@ -29,7 +29,7 @@ function renderReadingWithScore(rawText, { streaming } = {}) {
     ? `<div class="score-section">
         <div class="score-label">💘 우리 궁합 점수</div>
         <div class="score-heart">
-          <div class="score-heart-shape"></div>
+          <img src="./img/heart.webp" alt="궁합 점수 하트" />
           <div class="score-heart-text">${parsed.score}%</div>
         </div>
       </div>`
