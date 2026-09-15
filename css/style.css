@@ -724,6 +724,47 @@ button {
 .wx-금 { border-color: var(--pastel-yellow-deep); background: var(--pastel-yellow); color: #9a7a0a; }
 .wx-수 { border-color: var(--pastel-blue-deep); background: var(--pastel-blue); color: #2f6a9a; }
 
+/* ---------- Compat score heart ---------- */
+
+.score-section {
+  text-align: center;
+  margin: 6px 0 20px;
+}
+
+.score-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.score-heart {
+  position: relative;
+  width: 168px;
+  height: 168px;
+  margin: 0 auto;
+}
+
+.score-heart img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 0 rgba(0, 0, 0, 0.05));
+}
+
+.score-heart-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-10px);
+  font-size: 46px;
+  font-weight: 800;
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(180, 40, 80, 0.55);
+}
+
 /* ---------- Reading output ---------- */
 
 .reading {

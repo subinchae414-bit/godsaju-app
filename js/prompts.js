@@ -2,7 +2,13 @@
 // 간지(干支) 계산은 js/sajuCalc.js(검증된 만세력 라이브러리 기반)가 미리 정확히 끝내두고,
 // 여기서는 그 결과를 프롬프트에 그대로 박아 넣어 Claude가 "해석"만 하도록 한다.
 
-import { computeBazi, formatBaziForPrompt } from "./sajuCalc.js";
+import { computeBazi, formatBaziForPrompt, computeFortuneDays, formatFortuneForPrompt } from "./sajuCalc.js";
+
+export const FORTUNE_RANGES = {
+  tomorrow: { days: 1, label: "내일 운세" },
+  "3day": { days: 3, label: "3일 운세" },
+  week: { days: 7, label: "일주일 운세" },
+};
 
 function describePerson(p) {
   const cal = p.calendarType === "lunar" ? "음력" : "양력";
@@ -52,7 +58,9 @@ export function buildCompatibilityPrompt(personA, personB) {
 
   const system = `${BASE_SYSTEM}
 
-지금은 두 사람의 궁합을 해석하는 요청입니다. 두 사람의 관계(가족/연인/친구 등)에 맞는 톤으로 서술하고, 아래 구성을 따르세요.
+지금은 두 사람의 궁합을 해석하는 요청입니다. 두 사람의 관계(가족/연인/친구 등)에 맞는 톤으로 서술하세요.
+- 응답의 맨 첫 줄에는 다른 말 없이 정확히 "궁합 점수: NN점" 형식으로 100점 만점 기준 종합 궁합 점수를 정수로 먼저 제시하세요 (예: 궁합 점수: 87점). 극단적인 0점/100점보다는 실제 궁합처럼 자연스러운 편차가 있는 점수를 매기세요. 이 줄 외에는 점수를 본문에서 다시 언급하지 마세요.
+- 그다음 줄부터 아래 구성을 따라 마크다운으로 작성하세요.
 ## 두 사람의 사주 요약
 ## 궁합 총평
 ## 서로 잘 맞는 점
@@ -60,5 +68,31 @@ export function buildCompatibilityPrompt(personA, personB) {
 ## 관계를 더 좋게 만드는 팁`;
 
   const user = `다음 두 사람의 궁합을 봐주세요. 두 사람의 관계는 "${personA.relation} - ${personB.relation}" 성격의 관계입니다 (${personA.name}님이 보는 상대는 ${personB.name}님).\n\n[사람 1]\n${describePerson(personA)}\n\n${formatBaziForPrompt(baziA)}\n\n[사람 2]\n${describePerson(personB)}\n\n${formatBaziForPrompt(baziB)}`;
+  return { system, user };
+}
+
+// rangeKey: "tomorrow" | "3day" | "week" (FORTUNE_RANGES 참고)
+export function buildFortunePrompt(person, rangeKey) {
+  const range = FORTUNE_RANGES[rangeKey];
+  if (!range) {
+    throw new Error("알 수 없는 운세 기간이에요.");
+  }
+
+  const bazi = requireBazi(person);
+  const fortune = computeFortuneDays(bazi, range.days);
+  if (!fortune.ok) {
+    throw new Error(`${person.name}님의 운세를 계산하지 못했어요: ${fortune.error}`);
+  }
+
+  const isSingleDay = range.days === 1;
+
+  const system = `${BASE_SYSTEM}
+
+지금은 "${range.label}"(오늘을 기준으로 앞으로 ${range.days}일)를 해석하는 요청입니다. 사용자 메시지에는 이 사람의 사주 원국(연/월/일/시주, 일간)과, 앞으로 ${range.days}일 각 날짜의 일진(日辰) 간지·오행·십신이 이미 정확히 계산되어 포함되어 있습니다. 그 날의 일진이 본인 일간과 어떤 십신 관계인지를 바탕으로 하루하루의 기운을 해석하세요. 아래 구성을 따르세요.
+## ${range.label} 총운
+${isSingleDay ? "" : `## 날짜별 기운 (제공된 날짜마다 하나씩, - 목록으로 짧게 한두 문장씩)\n`}## 이 기간 주의할 점
+## 힘이 되는 조언 (2~3문장)`;
+
+  const user = `다음 사람의 ${range.label}를 봐주세요.\n\n${describePerson(person)}\n\n${formatBaziForPrompt(bazi)}\n\n${formatFortuneForPrompt(bazi, fortune)}`;
   return { system, user };
 }

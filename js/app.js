@@ -5,6 +5,7 @@ import { renderCompat } from "./views/compat.js";
 import { renderSettings } from "./views/settings.js";
 import { renderLock } from "./views/lock.js";
 import { renderShare } from "./views/share.js";
+import { renderFortune } from "./views/fortune.js";
 import { getApiKey } from "./storage.js";
 import { getSpaceId } from "./space.js";
 
@@ -90,7 +91,7 @@ async function route() {
     return;
   }
 
-  const [first, second, third] = segments;
+  const [first, second, third, fourth] = segments;
 
   const shell = document.createElement("div");
   shell.innerHTML = renderTopbar() + ensureApiKeyBanner();
@@ -113,6 +114,8 @@ async function route() {
     await renderPersonForm(contentHost, { id: second });
   } else if (first === "person" && second && third === "saju") {
     await renderSaju(contentHost, { id: second });
+  } else if (first === "person" && second && third === "fortune") {
+    await renderFortune(contentHost, { id: second, range: fourth });
   } else if (first === "compat") {
     await renderCompat(contentHost);
   } else if (first === "settings") {
