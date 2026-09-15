@@ -143,6 +143,67 @@ export function computeBazi(person) {
   };
 }
 
+const WEEKDAY_KO = ["일", "월", "화", "수", "목", "금", "토"];
+
+function formatDateLabel(dateObj) {
+  return `${dateObj.getMonth() + 1}월 ${dateObj.getDate()}일(${WEEKDAY_KO[dateObj.getDay()]})`;
+}
+
+function toDateKey(dateObj) {
+  const y = dateObj.getFullYear();
+  const m = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const d = String(dateObj.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+// 특정 사람의 일간(日干)을 기준으로, 내일부터 dayCount일간의 일진(日辰)과
+// 그날이 본인에게 어떤 십신(十神)에 해당하는지 계산한다. (오늘의 운세/내일 운세/N일 운세용)
+// bazi: computeBazi(person)의 결과. startFrom: 기준일(보통 오늘, 로컬 자정 기준).
+export function computeFortuneDays(bazi, dayCount, startFrom = new Date()) {
+  if (typeof window === "undefined" || !window.Solar) {
+    return { ok: false, error: "사주 계산 라이브러리를 불러오지 못했어요. 인터넷 연결을 확인해주세요." };
+  }
+  if (!bazi.ok) {
+    return { ok: false, error: bazi.error };
+  }
+
+  const dayMasterGanIndex = bazi.pillars.day.ganIndex;
+  const days = [];
+  for (let i = 1; i <= dayCount; i++) {
+    const d = new Date(startFrom.getFullYear(), startFrom.getMonth(), startFrom.getDate() + i);
+    let pillar;
+    try {
+      const solar = window.Solar.fromYmdHms(d.getFullYear(), d.getMonth() + 1, d.getDate(), 12, 0, 0);
+      const lunar = solar.getLunar();
+      pillar = pillarInfo(lunar.getDayGanIndexExact(), lunar.getDayZhiIndexExact());
+    } catch (err) {
+      return { ok: false, error: "날짜를 계산하지 못했어요." };
+    }
+    days.push({
+      date: d,
+      dateKey: toDateKey(d),
+      label: formatDateLabel(d),
+      pillar,
+      tenGod: tenGod(dayMasterGanIndex, pillar.ganIndex),
+    });
+  }
+  return { ok: true, days };
+}
+
+// Claude 프롬프트에 그대로 삽입할 일진 텍스트 블록.
+export function formatFortuneForPrompt(bazi, fortune) {
+  if (!fortune.ok) return "";
+  const lines = [
+    "[검증된 일진(日辰) 계산 결과 — 아래 날짜별 간지·십신은 이미 정확히 계산된 것이므로 그대로 인용하고, 절대 직접 다시 계산하거나 다른 날짜/간지를 만들어내지 마세요]",
+    `- 이 사람의 일간(본인 기준): ${bazi.dayMaster.gan}(${bazi.dayMaster.ganHanja}), 오행 ${bazi.dayMaster.wuxing}`,
+    ...fortune.days.map(
+      (d) =>
+        `- ${d.label}: 일진 ${d.pillar.ganZhiKo}(${d.pillar.ganZhiHanja}) · 오행 ${d.pillar.ganWuxing}+${d.pillar.zhiWuxing} · 본인 일간 기준 십신=${d.tenGod}`
+    ),
+  ];
+  return lines.join("\n");
+}
+
 function pillarLine(label, p) {
   if (!p) return `- ${label}: 정보 없음`;
   return `- ${label}: ${p.ganZhiKo}(${p.ganZhiHanja}) · 오행 ${p.ganWuxing}+${p.zhiWuxing}`;

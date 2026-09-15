@@ -146,6 +146,7 @@ export async function renderPersonForm(container, params) {
         await updatePerson(existing.id, payload);
         await clearCacheFor(`saju:${existing.id}`);
         await clearCacheFor(`compat:`);
+        await clearCacheFor(`fortune:`);
       } else {
         await addPerson(payload);
       }
@@ -167,6 +168,7 @@ export async function renderPersonForm(container, params) {
         await deletePerson(existing.id);
         await clearCacheFor(`saju:${existing.id}`);
         await clearCacheFor(`compat:`);
+        await clearCacheFor(`fortune:`);
         location.hash = "#/";
       } catch (err) {
         showError(err?.message || "삭제에 실패했어요.");

@@ -4,6 +4,7 @@ import { buildPersonalPrompt } from "../prompts.js";
 import { renderMarkdown } from "../markdown.js";
 import { computeBazi } from "../sajuCalc.js";
 import { getSpaceId } from "../space.js";
+import { FORTUNE_RANGES } from "../prompts.js";
 
 function initial(name) {
   return name?.trim()?.[0] || "?";
@@ -103,6 +104,13 @@ export async function renderSaju(container, params) {
       </div>
 
       ${renderBaziCard(bazi)}
+
+      <div class="section-title" style="margin:16px 2px 8px;">기간별 운세 보기 🐾</div>
+      <div class="pill-group" style="margin-bottom:4px;">
+        ${Object.entries(FORTUNE_RANGES)
+          .map(([key, info]) => `<a class="pill" href="#/person/${person.id}/fortune/${key}">${info.label}</a>`)
+          .join("")}
+      </div>
 
       <div id="reading-area"></div>
       <div class="row-actions" id="regen-row" style="display:none;">
