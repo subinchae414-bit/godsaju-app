@@ -1,13 +1,16 @@
-// Claude API 클라이언트 (브라우저 직접 호출, 빌드 도구 없이 fetch 사용)
-import { getApiKey } from "./storage.js";
+// Claude API 클라이언트.
+// 브라우저가 Anthropic API를 직접 호출하지 않는다 — Supabase Edge Function(generate-reading)이
+// 서버 쪽에서 API 키를 들고 대신 호출하고, space(PIN)의 남은 횟수(credits)도 거기서 확인·차감한다.
+import { getSpaceId } from "./space.js";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./supabaseConfig.js";
 
-const API_URL = "https://api.anthropic.com/v1/messages";
-const MODEL = "claude-sonnet-4-6";
+const FUNCTION_URL = `${SUPABASE_URL}/functions/v1/generate-reading`;
 
 export class ClaudeApiError extends Error {
-  constructor(message, status) {
+  constructor(message, status, code) {
     super(message);
     this.status = status;
+    this.code = code;
   }
 }
 
@@ -19,40 +22,32 @@ export class ClaudeApiError extends Error {
  * @returns {Promise<string>} 전체 응답 텍스트
  */
 export async function streamMessage(systemPrompt, userPrompt, onChunk) {
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    throw new ClaudeApiError("API 키가 설정되지 않았습니다. 설정 화면에서 Anthropic API 키를 입력해주세요.", 0);
+  const spaceId = getSpaceId();
+  if (!spaceId) {
+    throw new ClaudeApiError("잠금이 해제되지 않았어요. 처음 화면에서 PIN을 입력해주세요.", 0);
   }
 
-  const res = await fetch(API_URL, {
+  const res = await fetch(FUNCTION_URL, {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-      "anthropic-dangerous-direct-browser-access": "true",
+      authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      apikey: SUPABASE_ANON_KEY,
     },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 4096,
-      system: systemPrompt,
-      stream: true,
-      messages: [{ role: "user", content: userPrompt }],
-    }),
+    body: JSON.stringify({ spaceId, system: systemPrompt, user: userPrompt }),
   });
 
   if (!res.ok || !res.body) {
     let detail = "";
+    let code = "";
     try {
       const errJson = await res.json();
       detail = errJson?.error?.message || "";
+      code = errJson?.error?.code || "";
     } catch {
       /* ignore */
     }
-    throw new ClaudeApiError(
-      detail || `Claude API 요청이 실패했습니다 (HTTP ${res.status}).`,
-      res.status
-    );
+    throw new ClaudeApiError(detail || `요청이 실패했어요 (HTTP ${res.status}).`, res.status, code);
   }
 
   const reader = res.body.getReader();

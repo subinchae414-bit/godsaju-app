@@ -1,6 +1,7 @@
 // 데이터 저장소.
-// - people / readings(사주·궁합 캐시): Supabase에 저장, PIN으로 파생된 space_id로 공유된다.
-// - Anthropic API 키: 결제와 직결되는 정보라 동기화하지 않고 이 기기의 localStorage에만 저장한다.
+// - people / readings(사주·궁합 캐시) / credits(잔여 횟수): Supabase에 저장, PIN으로 파생된
+//   space_id로 공유된다. Anthropic API 키는 더 이상 브라우저가 들고 있지 않는다 —
+//   supabase/functions/generate-reading 이 서버 쪽에서 대신 들고 호출한다.
 
 import { getSupabase } from "./supabaseClient.js";
 import { getSpaceId } from "./space.js";
@@ -112,20 +113,16 @@ export async function deletePerson(id) {
   if (error) throw error;
 }
 
-// ---------- API 키 (기기별 저장, 동기화하지 않음) ----------
-
-const API_KEY_KEY = "saju-app-api-key-v1";
-
-export function getApiKey() {
-  return localStorage.getItem(API_KEY_KEY) || "";
-}
-
-export function setApiKey(key) {
-  if (key) {
-    localStorage.setItem(API_KEY_KEY, key.trim());
-  } else {
-    localStorage.removeItem(API_KEY_KEY);
-  }
+// ---------- 잔여 횟수 (credits, 공간 공유) ----------
+// 실제 차감은 generate-reading 함수(서버)에서만 일어난다. 여기서는 화면 표시용으로 읽기만 한다.
+// 이 space에서 아직 한 번도 풀이를 요청한 적이 없다면 행 자체가 없을 수 있는데, 그 경우
+// generate-reading이 처음 호출될 때 무료 체험 횟수로 만들어지므로 null을 그대로 반환한다.
+export async function getCredits() {
+  const spaceId = requireSpace();
+  const sb = getSupabase();
+  const { data, error } = await sb.from("credits").select("balance").eq("space_id", spaceId).maybeSingle();
+  if (error) throw error;
+  return data ? data.balance : null;
 }
 
 // ---------- 사주/궁합 해석 캐시 (공간 공유) ----------

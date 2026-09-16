@@ -6,7 +6,7 @@ import { renderSettings } from "./views/settings.js";
 import { renderLock } from "./views/lock.js";
 import { renderShare } from "./views/share.js";
 import { renderFortune } from "./views/fortune.js";
-import { getApiKey } from "./storage.js";
+import { getCredits } from "./storage.js";
 import { getSpaceId } from "./space.js";
 
 const appEl = document.getElementById("app");
@@ -53,21 +53,24 @@ function renderTopbar() {
         <span class="mark">🐶</span>
         <span>사주풀이</span>
       </a>
-      <a class="icon-btn" href="#/settings" title="설정">⚙️</a>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <a href="#/settings" class="tag" id="credits-chip" style="display:none;"></a>
+        <a class="icon-btn" href="#/settings" title="설정">⚙️</a>
+      </div>
     </div>
   `;
 }
 
-function ensureApiKeyBanner() {
-  if (getApiKey()) return "";
-  return `
-    <div class="page" style="padding-bottom:0;">
-      <a href="#/settings" class="card" style="display:block;margin-bottom:2px;border-color:var(--gold);">
-        <strong style="color:var(--gold);">API 키를 먼저 등록해주세요 →</strong>
-        <div class="hint" style="margin-top:4px;">사주/궁합 풀이를 받으려면 Anthropic API 키가 필요해요.</div>
-      </a>
-    </div>
-  `;
+async function updateCreditsChip(host) {
+  const chip = host.querySelector("#credits-chip");
+  if (!chip) return;
+  try {
+    const balance = await getCredits();
+    chip.textContent = `🐾 ${balance ?? "?"}회 남음`;
+    chip.style.display = "inline-block";
+  } catch {
+    /* 조용히 무시 (설정 화면에서 다시 시도 가능) */
+  }
 }
 
 async function route() {
@@ -94,13 +97,14 @@ async function route() {
   const [first, second, third, fourth] = segments;
 
   const shell = document.createElement("div");
-  shell.innerHTML = renderTopbar() + ensureApiKeyBanner();
+  shell.innerHTML = renderTopbar();
 
   const contentHost = document.createElement("div");
   shell.appendChild(contentHost);
 
   appEl.innerHTML = "";
   appEl.appendChild(shell);
+  updateCreditsChip(shell);
 
   const tabbarWrap = document.createElement("div");
   tabbarWrap.innerHTML = renderTabbar(currentTab(segments));

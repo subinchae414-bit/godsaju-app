@@ -449,6 +449,13 @@ button {
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
 .btn-primary {
   background: linear-gradient(135deg, var(--gold), #ff8a3d);
   color: #ffffff;
