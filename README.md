@@ -67,6 +67,11 @@ create policy "public access to readings" on readings
 
 create policy "public access to credits" on credits
   for all using (true) with check (true);
+
+-- people/readings와 달리 credits는 이후에 추가된 테이블이라 anon 롤에 대한
+-- 테이블 단위 권한이 없다. RLS 정책과 별개로 이 GRANT가 없으면 브라우저(anon 키)에서
+-- "permission denied for table credits" 에러가 난다.
+grant select on table credits to anon, authenticated;
 ```
 
 > `credits` 테이블은 클라이언트(브라우저)에서는 **읽기만** 합니다 (설정 화면의 "남은 횟수" 표시용). 실제 차감·초기화는 아래에서 만드는 Edge Function이 `service_role` 키로만 처리해요.
