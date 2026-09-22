@@ -5,6 +5,7 @@ import { renderMarkdown } from "../markdown.js";
 import { computeBazi } from "../sajuCalc.js";
 import { getSpaceId } from "../space.js";
 import { FORTUNE_RANGES } from "../prompts.js";
+import { confirmSpend, cancelledSpendHtml } from "../credits.js";
 
 function initial(name) {
   return name?.trim()?.[0] || "?";
@@ -131,7 +132,7 @@ export async function renderSaju(container, params) {
   const shareBtn = container.querySelector("#share-btn");
   const toastEl = container.querySelector("#saju-toast");
 
-  regenBtn.addEventListener("click", () => runReading());
+  regenBtn.addEventListener("click", () => attemptRun());
 
   shareBtn.addEventListener("click", async () => {
     const spaceId = getSpaceId();
@@ -178,6 +179,16 @@ export async function renderSaju(container, params) {
     regenRow.style.display = "flex";
     setHasReading(true);
   } else {
+    attemptRun();
+  }
+
+  function attemptRun() {
+    if (!confirmSpend()) {
+      area.innerHTML = cancelledSpendHtml();
+      regenRow.style.display = "flex";
+      setHasReading(false);
+      return;
+    }
     runReading();
   }
 

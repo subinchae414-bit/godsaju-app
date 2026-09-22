@@ -67,7 +67,7 @@ async function updateCreditsChip(host) {
   if (!chip) return;
   try {
     const balance = await getCredits();
-    chip.textContent = `🐾 ${balance ?? "?"}회 남음`;
+    chip.textContent = `🐾 ${balance ?? "?"}젤리 남음`;
     chip.style.display = "inline-block";
   } catch {
     /* 조용히 무시 (설정 화면에서 다시 시도 가능) */
