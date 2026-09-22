@@ -84,20 +84,20 @@ export async function renderHome(container) {
           <div class="menu-title">궁합 보기 <span class="menu-badge">🐾</span></div>
           <div class="menu-desc">우리 사이는 몇 점?</div>
         </a>
-        <a class="menu-card menu-blue" href="${daewoonHref}" data-menu="daewoon">
-          <div class="menu-photo blob-c"><img src="./img/dogs/daewoon.jpg" alt="대운 보기" /></div>
-          <div class="menu-title">대운 보기 <span class="menu-badge">🐾</span></div>
-          <div class="menu-desc">물 들어올 때 노 젓자</div>
-        </a>
         <a class="menu-card menu-purple" href="${todayHref}" data-menu="today">
-          <div class="menu-photo blob-d"><img src="./img/dogs/today.jpg" alt="오늘 운세" /></div>
+          <div class="menu-photo blob-c"><img src="./img/dogs/today.jpg" alt="오늘 운세" /></div>
           <div class="menu-title">오늘 운세 <span class="menu-badge">🐾</span></div>
           <div class="menu-desc">오늘 하루는 어떨까?</div>
         </a>
         <a class="menu-card menu-peach" href="${tomorrowHref}" data-menu="tomorrow">
-          <div class="menu-photo blob-a"><img src="./img/dogs/encourage.jpg" alt="내일 운세" /></div>
+          <div class="menu-photo blob-d"><img src="./img/dogs/encourage.jpg" alt="내일 운세" /></div>
           <div class="menu-title">내일 운세 <span class="menu-badge">🐾</span></div>
           <div class="menu-desc">내일은 또 어떤 하루?</div>
+        </a>
+        <a class="menu-card menu-blue" href="${daewoonHref}" data-menu="daewoon">
+          <div class="menu-photo blob-a"><img src="./img/dogs/daewoon.jpg" alt="대운 보기" /></div>
+          <div class="menu-title">대운 보기 <span class="menu-badge">🐾</span></div>
+          <div class="menu-desc">물 들어올 때 노 젓자</div>
         </a>
       </div>
 
