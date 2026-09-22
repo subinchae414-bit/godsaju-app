@@ -3,6 +3,7 @@ import { streamMessage, ClaudeApiError } from "../claude.js";
 import { buildCompatibilityPrompt } from "../prompts.js";
 import { renderMarkdown } from "../markdown.js";
 import { computeBazi } from "../sajuCalc.js";
+import { confirmSpend, cancelledSpendHtml } from "../credits.js";
 
 function pillarCell(label, p) {
   if (!p) return `<div class="pillar-cell"><div class="pillar-label">${label}</div><div class="pillar-value pillar-empty">시각 모름</div></div>`;
@@ -152,6 +153,12 @@ export async function renderCompat(container) {
         regenRow.style.display = "block";
         return;
       }
+    }
+
+    if (!confirmSpend()) {
+      area.innerHTML = cancelledSpendHtml();
+      regenRow.style.display = "block";
+      return;
     }
     runReading(personA, personB, cacheKey);
   }

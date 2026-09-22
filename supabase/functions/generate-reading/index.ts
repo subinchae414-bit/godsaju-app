@@ -1,6 +1,6 @@
 // 사주풀이 앱의 Claude API 프록시.
 // 브라우저는 더 이상 Anthropic API 키를 들고 있지 않는다 — 이 함수가 서버 쪽 비밀값
-// (ANTHROPIC_API_KEY)으로 대신 호출하고, 요청한 space(PIN)의 남은 횟수(credits)를 확인·차감한다.
+// (ANTHROPIC_API_KEY)으로 대신 호출하고, 요청한 space(PIN)의 남은 젤리(credits)를 확인·차감한다.
 //
 // 배포: supabase functions deploy generate-reading
 // 비밀값 등록: supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
@@ -13,7 +13,7 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 const MODEL = "claude-sonnet-4-6";
 
-// 새로 생성되는 space(PIN)에게 주는 무료 체험 횟수. 필요하면 값만 바꾸세요.
+// 새로 생성되는 space(PIN)에게 주는 무료 체험 젤리 개수. 필요하면 값만 바꾸세요.
 const FREE_TRIAL_CREDITS = 3;
 
 const corsHeaders = {
@@ -57,12 +57,12 @@ Deno.serve(async (req) => {
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-  // 처음 보는 space면 무료 체험 횟수로 credits 행을 만든다 (이미 있으면 그대로 둠).
+  // 처음 보는 space면 무료 체험 젤리로 credits 행을 만든다 (이미 있으면 그대로 둠).
   const { error: upsertErr } = await supabase
     .from("credits")
     .upsert({ space_id: spaceId, balance: FREE_TRIAL_CREDITS }, { onConflict: "space_id", ignoreDuplicates: true });
   if (upsertErr) {
-    return jsonError(`잔여 횟수를 확인하지 못했어요: ${upsertErr.message}`, 500);
+    return jsonError(`잔여 젤리를 확인하지 못했어요: ${upsertErr.message}`, 500);
   }
 
   const { data: creditRow, error: selectErr } = await supabase
@@ -71,12 +71,12 @@ Deno.serve(async (req) => {
     .eq("space_id", spaceId)
     .maybeSingle();
   if (selectErr) {
-    return jsonError(`잔여 횟수를 확인하지 못했어요: ${selectErr.message}`, 500);
+    return jsonError(`잔여 젤리를 확인하지 못했어요: ${selectErr.message}`, 500);
   }
 
   const balance = creditRow?.balance ?? 0;
   if (balance <= 0) {
-    return jsonError("사용 가능한 횟수를 모두 썼어요. 충전 후 다시 시도해주세요.", 402, "NO_CREDITS");
+    return jsonError("사용 가능한 젤리를 모두 썼어요. 충전 후 다시 시도해주세요.", 402, "NO_CREDITS");
   }
 
   let anthropicRes;

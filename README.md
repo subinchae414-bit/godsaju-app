@@ -5,8 +5,8 @@
 
 ## 어떻게 동작하나요
 
-- **사람 목록 / 사주·궁합·운세 풀이 결과 / 남은 횟수(credits)**는 [Supabase](https://supabase.com)(무료 클라우드 DB)에 저장됩니다. 앱 첫 화면에서 입력하는 **PIN(비밀번호)** 이 곧 "공간 식별자"가 되어서, 같은 PIN을 입력한 모든 기기가 같은 데이터를 보게 됩니다.
-- **Anthropic API 키는 브라우저가 아예 들고 있지 않습니다.** 사용자가 API 키를 입력할 필요가 없어요 — 대신 `supabase/functions/generate-reading`이라는 **Supabase Edge Function(서버 코드)**이 API 키를 비밀값으로 들고 있다가, 앱이 풀이를 요청하면 그 space(PIN)의 남은 횟수를 확인한 뒤 대신 호출해줍니다. 새로운 PIN(space)은 처음 쓸 때 무료 체험 횟수(기본 3회)가 자동으로 주어집니다.
+- **사람 목록 / 사주·궁합·운세 풀이 결과 / 남은 젤리(credits)**는 [Supabase](https://supabase.com)(무료 클라우드 DB)에 저장됩니다. 앱 첫 화면에서 입력하는 **PIN(비밀번호)** 이 곧 "공간 식별자"가 되어서, 같은 PIN을 입력한 모든 기기가 같은 데이터를 보게 됩니다.
+- **Anthropic API 키는 브라우저가 아예 들고 있지 않습니다.** 사용자가 API 키를 입력할 필요가 없어요 — 대신 `supabase/functions/generate-reading`이라는 **Supabase Edge Function(서버 코드)**이 API 키를 비밀값으로 들고 있다가, 앱이 풀이를 요청하면 그 space(PIN)의 남은 젤리를 확인한 뒤 대신 호출해줍니다. 새로운 PIN(space)은 처음 쓸 때 무료 체험 젤리(기본 3개)가 자동으로 주어집니다. 풀이를 실제로 요청하기 전에는 "1젤리가 사용돼요, 진행할까요?" 확인을 거쳐요.
 - 앱 파일(HTML/CSS/JS) 자체는 **GitHub Pages**로 무료 배포해서, 인터넷이 되는 어떤 기기에서든 접속할 수 있게 합니다.
 - **결제(충전)는 아직 준비 중**입니다. 설정 화면에 "충전하기" 버튼 자리는 만들어뒀지만, 실제 결제 연동은 결제대행사(PG) 계정이 있어야 붙일 수 있어요. 아래 "결제(충전) 붙이기" 섹션을 참고하세요.
 
@@ -76,7 +76,7 @@ create policy "public access to credits" on credits
 grant select, insert, update, delete on table credits to anon, authenticated, service_role;
 ```
 
-> `credits` 테이블은 클라이언트(브라우저)에서는 **읽기만** 합니다 (설정 화면의 "남은 횟수" 표시용). 실제 차감·초기화는 아래에서 만드는 Edge Function이 `service_role` 키로만 처리해요.
+> `credits` 테이블은 클라이언트(브라우저)에서는 **읽기만** 합니다 (설정 화면의 "남은 젤리" 표시용). 실제 차감·초기화는 아래에서 만드는 Edge Function이 `service_role` 키로만 처리해요.
 
 3. 왼쪽 메뉴 **Settings → API**로 이동해서 다음 두 값을 복사해둡니다.
    - **Project URL**
@@ -141,9 +141,9 @@ git push -u origin main
 ## 5. 사용 시작하기
 
 1. 접속하면 나오는 잠금 화면에서 **가족·지인과 함께 쓸 PIN**을 정해서 입력합니다. (4자 이상, 예: `우리가족0501`)
-2. 다른 기기에서도 **같은 URL + 같은 PIN**으로 들어오면 같은 데이터를 공유하게 됩니다. 처음 쓰는 PIN이면 무료 체험 횟수(기본 3회)가 자동으로 생겨요.
+2. 다른 기기에서도 **같은 URL + 같은 PIN**으로 들어오면 같은 데이터를 공유하게 됩니다. 처음 쓰는 PIN이면 무료 체험 젤리(기본 3개)가 자동으로 생겨요.
 3. 홈 화면의 **+** 버튼으로 나(본인), 가족, 연인, 친구를 등록합니다.
-4. 이름을 눌러 사주 풀이를 확인하고, **궁합** 탭에서 두 사람을 골라 궁합을 봅니다. 남은 횟수는 **설정** 화면에서 확인할 수 있어요.
+4. 이름을 눌러 사주 풀이를 확인하고, **궁합** 탭에서 두 사람을 골라 궁합을 봅니다. 남은 젤리는 **설정** 화면에서 확인할 수 있어요.
 
 ## 결제(충전) 붙이기
 
@@ -169,11 +169,12 @@ python3 -m http.server 8000
 ```
 index.html               진입점 (Supabase JS 라이브러리, 만세력 라이브러리 CDN/로컬 로드)
 css/style.css              전체 스타일
-js/app.js                   해시 기반 라우터 + PIN 잠금 게이트 + 남은 횟수 표시
+js/app.js                   해시 기반 라우터 + PIN 잠금 게이트 + 남은 젤리 표시
 js/space.js                 PIN → 공간 식별자(space_id) 파생/저장
 js/supabaseConfig.js        Supabase 프로젝트 URL/anon key (직접 입력 필요)
 js/supabaseClient.js        Supabase 클라이언트 생성
-js/storage.js               사람/캐시/남은 횟수 데이터 CRUD (Supabase)
+js/storage.js               사람/캐시/남은 젤리 데이터 CRUD (Supabase)
+js/credits.js                풀이(=젤리 차감) 전 yes/no 확인 공통 헬퍼
 js/claude.js                 generate-reading Edge Function 스트리밍 호출 (API 키는 서버에만 있음)
 js/sajuCalc.js                만세력(vendor/lunar.js) 기반 사주 간지 정밀 계산
 js/prompts.js                사주/궁합/운세 프롬프트 생성 (계산된 간지를 그대로 전달)
@@ -187,13 +188,13 @@ js/views/compat.js            궁합 풀이 (하트 점수 포함)
 js/views/fortune.js           오늘/내일 운세
 js/views/daewoon.js           대운 풀이 (초년/중년/말년)
 js/views/share.js             PIN 없이 보는 읽기 전용 공유 링크
-js/views/settings.js          남은 횟수 확인 / 충전 / 공간 전환
-supabase/functions/generate-reading/index.ts   Claude API 프록시 (API 키·횟수 차감을 서버에서 처리)
+js/views/settings.js          남은 젤리 확인 / 충전 / 공간 전환
+supabase/functions/generate-reading/index.ts   Claude API 프록시 (API 키·젤리 차감을 서버에서 처리)
 ```
 
 ## 데이터에 대해
 
-- 사람 프로필, 사주/궁합/운세 풀이 결과, 남은 횟수: Supabase에 저장되며, 같은 PIN을 아는 모든 기기에서 공유됩니다.
+- 사람 프로필, 사주/궁합/운세 풀이 결과, 남은 젤리: Supabase에 저장되며, 같은 PIN을 아는 모든 기기에서 공유됩니다.
 - Anthropic API 키: 브라우저에는 전혀 저장되지 않습니다. `supabase/functions/generate-reading`이 서버 쪽 비밀값으로만 갖고 있어요.
 - 연주/월주/일주/시주(간지)는 `js/vendor/lunar.js`(만세력 라이브러리, 절기·율리우스일 기반)로 정밀 계산되며, Claude는 이 계산된 간지를 바탕으로 해석 글만 작성합니다. 다만 성격·강점 등 해석 자체는 AI가 작성한 참고용 콘텐츠입니다.
 - 음력(윤달) 생일은 현재 평달만 지원해요. 윤달에 태어난 분은 정확한 간지가 아닐 수 있습니다.

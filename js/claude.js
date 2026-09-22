@@ -1,6 +1,6 @@
 // Claude API 클라이언트.
 // 브라우저가 Anthropic API를 직접 호출하지 않는다 — Supabase Edge Function(generate-reading)이
-// 서버 쪽에서 API 키를 들고 대신 호출하고, space(PIN)의 남은 횟수(credits)도 거기서 확인·차감한다.
+// 서버 쪽에서 API 키를 들고 대신 호출하고, space(PIN)의 남은 젤리(credits)도 거기서 확인·차감한다.
 import { getSpaceId } from "./space.js";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./supabaseConfig.js";
 

@@ -3,6 +3,7 @@ import { streamMessage, ClaudeApiError } from "../claude.js";
 import { buildDaewoonPrompt, DAEWOON_PHASES } from "../prompts.js";
 import { renderMarkdown } from "../markdown.js";
 import { computeBazi, computeDaewoon } from "../sajuCalc.js";
+import { confirmSpend, cancelledSpendHtml } from "../credits.js";
 
 function initial(name) {
   return name?.trim()?.[0] || "?";
@@ -99,7 +100,7 @@ export async function renderDaewoon(container, { id, phase }) {
   const regenRow = container.querySelector("#regen-row");
   const regenBtn = container.querySelector("#regen-btn");
 
-  regenBtn.addEventListener("click", () => runReading());
+  regenBtn.addEventListener("click", () => attemptRun());
 
   if (!bazi.ok || !daewoon.ok || cycles.length === 0) {
     return;
@@ -117,6 +118,15 @@ export async function renderDaewoon(container, { id, phase }) {
     area.innerHTML = `<div class="reading">${renderMarkdown(cached.text)}</div>`;
     regenRow.style.display = "flex";
   } else {
+    attemptRun();
+  }
+
+  function attemptRun() {
+    if (!confirmSpend()) {
+      area.innerHTML = cancelledSpendHtml();
+      regenRow.style.display = "flex";
+      return;
+    }
     runReading();
   }
 
