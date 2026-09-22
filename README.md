@@ -67,6 +67,13 @@ create policy "public access to readings" on readings
 
 create policy "public access to credits" on credits
   for all using (true) with check (true);
+
+-- people/readings와 달리 credits는 이후에 추가된 테이블이라 롤별 테이블 단위 권한이
+-- 없다. RLS 정책과 별개로 이 GRANT가 없으면 "permission denied for table credits"
+-- 에러가 난다. service_role은 RLS는 우회하지만 GRANT 자체는 우회하지 않으므로,
+-- generate-reading Edge Function(service_role 키 사용)이 credits를 읽고 쓰려면
+-- service_role에도 명시적으로 권한을 줘야 한다.
+grant select, insert, update, delete on table credits to anon, authenticated, service_role;
 ```
 
 > `credits` 테이블은 클라이언트(브라우저)에서는 **읽기만** 합니다 (설정 화면의 "남은 횟수" 표시용). 실제 차감·초기화는 아래에서 만드는 Edge Function이 `service_role` 키로만 처리해요.
@@ -177,7 +184,8 @@ js/views/home.js              홈(사람 목록)
 js/views/personForm.js        사람 추가/수정
 js/views/saju.js              개인 사주 풀이
 js/views/compat.js            궁합 풀이 (하트 점수 포함)
-js/views/fortune.js           내일/3일/일주일 운세
+js/views/fortune.js           오늘/내일 운세
+js/views/daewoon.js           대운 풀이 (초년/중년/말년)
 js/views/share.js             PIN 없이 보는 읽기 전용 공유 링크
 js/views/settings.js          남은 횟수 확인 / 충전 / 공간 전환
 supabase/functions/generate-reading/index.ts   Claude API 프록시 (API 키·횟수 차감을 서버에서 처리)
