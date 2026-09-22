@@ -147,6 +147,10 @@ button {
   margin: 4px 0 6px;
 }
 
+.menu-grid > :last-child:nth-child(odd) {
+  grid-column: span 2;
+}
+
 .menu-card {
   display: flex;
   flex-direction: column;

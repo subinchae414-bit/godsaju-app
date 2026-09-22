@@ -2,12 +2,26 @@
 // 간지(干支) 계산은 js/sajuCalc.js(검증된 만세력 라이브러리 기반)가 미리 정확히 끝내두고,
 // 여기서는 그 결과를 프롬프트에 그대로 박아 넣어 Claude가 "해석"만 하도록 한다.
 
-import { computeBazi, formatBaziForPrompt, computeFortuneDays, formatFortuneForPrompt } from "./sajuCalc.js";
+import {
+  computeBazi,
+  formatBaziForPrompt,
+  computeFortuneDays,
+  formatFortuneForPrompt,
+  computeDaewoon,
+  formatDaewoonForPrompt,
+} from "./sajuCalc.js";
 
 export const FORTUNE_RANGES = {
-  tomorrow: { days: 1, label: "내일 운세" },
-  "3day": { days: 3, label: "3일 운세" },
-  week: { days: 7, label: "일주일 운세" },
+  today: { days: 1, startOffset: 0, label: "오늘 운세" },
+  tomorrow: { days: 1, startOffset: 1, label: "내일 운세" },
+};
+
+// 대운을 세 시기로 나눠서 보여준다. 각 대운은 10년 단위라 나이 구간이 시기 경계에 걸칠 수 있는데,
+// 그런 경우 그 대운이 "시작하는" 나이를 기준으로 시기를 정한다.
+export const DAEWOON_PHASES = {
+  early: { label: "초년 대운", match: (startAge) => startAge < 30 },
+  middle: { label: "중년 대운", match: (startAge) => startAge >= 30 && startAge < 60 },
+  late: { label: "말년 대운", match: (startAge) => startAge >= 60 },
 };
 
 function describePerson(p) {
@@ -71,7 +85,7 @@ export function buildCompatibilityPrompt(personA, personB) {
   return { system, user };
 }
 
-// rangeKey: "tomorrow" | "3day" | "week" (FORTUNE_RANGES 참고)
+// rangeKey: "today" | "tomorrow" (FORTUNE_RANGES 참고)
 export function buildFortunePrompt(person, rangeKey) {
   const range = FORTUNE_RANGES[rangeKey];
   if (!range) {
@@ -79,20 +93,50 @@ export function buildFortunePrompt(person, rangeKey) {
   }
 
   const bazi = requireBazi(person);
-  const fortune = computeFortuneDays(bazi, range.days);
+  const fortune = computeFortuneDays(bazi, range.days, new Date(), range.startOffset);
   if (!fortune.ok) {
     throw new Error(`${person.name}님의 운세를 계산하지 못했어요: ${fortune.error}`);
   }
 
-  const isSingleDay = range.days === 1;
+  const dayDesc = range.startOffset === 0 ? "오늘 하루" : "내일 하루";
 
   const system = `${BASE_SYSTEM}
 
-지금은 "${range.label}"(오늘을 기준으로 앞으로 ${range.days}일)를 해석하는 요청입니다. 사용자 메시지에는 이 사람의 사주 원국(연/월/일/시주, 일간)과, 앞으로 ${range.days}일 각 날짜의 일진(日辰) 간지·오행·십신이 이미 정확히 계산되어 포함되어 있습니다. 그 날의 일진이 본인 일간과 어떤 십신 관계인지를 바탕으로 하루하루의 기운을 해석하세요. 아래 구성을 따르세요.
+지금은 "${range.label}"(${dayDesc})를 해석하는 요청입니다. 사용자 메시지에는 이 사람의 사주 원국(연/월/일/시주, 일간)과, 해당 날짜의 일진(日辰) 간지·오행·십신이 이미 정확히 계산되어 포함되어 있습니다. 그 날의 일진이 본인 일간과 어떤 십신 관계인지를 바탕으로 하루의 기운을 해석하세요. 아래 구성을 따르세요.
 ## ${range.label} 총운
-${isSingleDay ? "" : `## 날짜별 기운 (제공된 날짜마다 하나씩, - 목록으로 짧게 한두 문장씩)\n`}## 이 기간 주의할 점
+## 이날 주의할 점
 ## 힘이 되는 조언 (2~3문장)`;
 
   const user = `다음 사람의 ${range.label}를 봐주세요.\n\n${describePerson(person)}\n\n${formatBaziForPrompt(bazi)}\n\n${formatFortuneForPrompt(bazi, fortune)}`;
+  return { system, user };
+}
+
+// phaseKey: "early" | "middle" | "late" (DAEWOON_PHASES 참고)
+export function buildDaewoonPrompt(person, phaseKey) {
+  const phase = DAEWOON_PHASES[phaseKey];
+  if (!phase) {
+    throw new Error("알 수 없는 대운 시기예요.");
+  }
+
+  const bazi = requireBazi(person);
+  const daewoon = computeDaewoon(person);
+  if (!daewoon.ok) {
+    throw new Error(`${person.name}님의 대운을 계산하지 못했어요: ${daewoon.error}`);
+  }
+
+  const cycles = daewoon.cycles.filter((c) => phase.match(c.startAge));
+  if (cycles.length === 0) {
+    throw new Error(`${person.name}님의 ${phase.label} 구간을 찾지 못했어요.`);
+  }
+
+  const system = `${BASE_SYSTEM}
+
+지금은 "${phase.label}"(만 ${cycles[0].startAge}세~${cycles[cycles.length - 1].endAge}세)을 해석하는 요청입니다. 사용자 메시지에는 이 사람의 사주 원국(연/월/일/시주, 일간)과, 이 시기에 해당하는 대운(大運, 10년 단위로 바뀌는 큰 흐름) 각각의 간지·오행·십신이 이미 정확히 계산되어 포함되어 있습니다. 각 대운이 본인 일간과 어떤 십신 관계인지를 바탕으로 이 시기 전반의 흐름을 해석하세요. 아래 구성을 따르세요.
+## ${phase.label} 흐름 총평
+## 대운별 기운 (제공된 대운마다 하나씩, - 목록으로 나이 구간과 함께 짧게)
+## 이 시기 주의할 점
+## 힘이 되는 조언 (2~3문장)`;
+
+  const user = `다음 사람의 ${phase.label}을 봐주세요.\n\n${describePerson(person)}\n\n${formatBaziForPrompt(bazi)}\n\n${formatDaewoonForPrompt(bazi, daewoon, cycles)}`;
   return { system, user };
 }

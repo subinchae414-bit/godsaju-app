@@ -184,7 +184,8 @@ js/views/home.js              홈(사람 목록)
 js/views/personForm.js        사람 추가/수정
 js/views/saju.js              개인 사주 풀이
 js/views/compat.js            궁합 풀이 (하트 점수 포함)
-js/views/fortune.js           내일/3일/일주일 운세
+js/views/fortune.js           오늘/내일 운세
+js/views/daewoon.js           대운 풀이 (초년/중년/말년)
 js/views/share.js             PIN 없이 보는 읽기 전용 공유 링크
 js/views/settings.js          남은 횟수 확인 / 충전 / 공간 전환
 supabase/functions/generate-reading/index.ts   Claude API 프록시 (API 키·횟수 차감을 서버에서 처리)

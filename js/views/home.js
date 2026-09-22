@@ -57,7 +57,11 @@ export async function renderHome(container) {
           )
           .join("");
 
-  const sajuHref = people.length > 0 ? `#/person/${people[0].id}/saju` : "#/person/new";
+  const personHref = (suffix) => (people.length > 0 ? `#/person/${people[0].id}${suffix}` : "#/person/new");
+  const sajuHref = personHref("/saju");
+  const daewoonHref = personHref("/daewoon/early");
+  const todayHref = personHref("/fortune/today");
+  const tomorrowHref = personHref("/fortune/tomorrow");
 
   container.innerHTML = `
     <div class="page">
@@ -80,37 +84,30 @@ export async function renderHome(container) {
           <div class="menu-title">궁합 보기 <span class="menu-badge">🐾</span></div>
           <div class="menu-desc">우리 사이는 몇 점?</div>
         </a>
-        <button type="button" class="menu-card menu-blue" data-toast="대운 풀이는 곧 만나요! 조금만 기다려주세요 🐶">
+        <a class="menu-card menu-blue" href="${daewoonHref}" data-menu="daewoon">
           <div class="menu-photo blob-c"><img src="./img/dogs/daewoon.jpg" alt="대운 보기" /></div>
           <div class="menu-title">대운 보기 <span class="menu-badge">🐾</span></div>
           <div class="menu-desc">물 들어올 때 노 젓자</div>
-        </button>
-        <button type="button" class="menu-card menu-purple" data-toast="오늘의 운세는 곧 만나요! 조금만 기다려주세요 🐶">
-          <div class="menu-photo blob-d"><img src="./img/dogs/today.jpg" alt="오늘의 운세" /></div>
-          <div class="menu-title">오늘의 운세 <span class="menu-badge">🐾</span></div>
+        </a>
+        <a class="menu-card menu-purple" href="${todayHref}" data-menu="today">
+          <div class="menu-photo blob-d"><img src="./img/dogs/today.jpg" alt="오늘 운세" /></div>
+          <div class="menu-title">오늘 운세 <span class="menu-badge">🐾</span></div>
           <div class="menu-desc">오늘 하루는 어떨까?</div>
-        </button>
+        </a>
+        <a class="menu-card menu-peach" href="${tomorrowHref}" data-menu="tomorrow">
+          <div class="menu-photo blob-a"><img src="./img/dogs/encourage.jpg" alt="내일 운세" /></div>
+          <div class="menu-title">내일 운세 <span class="menu-badge">🐾</span></div>
+          <div class="menu-desc">내일은 또 어떤 하루?</div>
+        </a>
       </div>
 
       <div class="section-title" style="margin-top:18px;">우리 아이들</div>
       ${listHtml}
     </div>
     <button class="fab" id="add-person-fab" aria-label="사람 추가">＋</button>
-    <div class="toast" id="home-toast"></div>
   `;
 
   container.querySelector("#add-person-fab").addEventListener("click", () => {
     location.hash = "#/person/new";
-  });
-
-  const toastEl = container.querySelector("#home-toast");
-  let toastTimer = null;
-  container.querySelectorAll("[data-toast]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      toastEl.textContent = btn.dataset.toast;
-      toastEl.classList.add("show");
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => toastEl.classList.remove("show"), 1800);
-    });
   });
 }

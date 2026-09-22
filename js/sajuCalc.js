@@ -65,7 +65,8 @@ function parseTime(birthTime) {
 }
 
 // person: { calendarType, birthDate, birthTime, timeUnknown }
-export function computeBazi(person) {
+// 만세력 변환(양력↔음력, EightChar 생성)은 computeBazi와 computeDaewoon이 공통으로 쓰므로 분리.
+function resolvePersonLunar(person) {
   if (typeof window === "undefined" || !window.Solar || !window.Lunar) {
     return { ok: false, error: "사주 계산 라이브러리를 불러오지 못했어요. 인터넷 연결을 확인해주세요." };
   }
@@ -98,7 +99,13 @@ export function computeBazi(person) {
     return { ok: false, error: "생년월일을 사주로 변환하지 못했어요. 날짜를 다시 확인해주세요." };
   }
 
-  const eightChar = lunar.getEightChar();
+  return { ok: true, timeKnown, hour, minute, lunar, solar, eightChar: lunar.getEightChar() };
+}
+
+export function computeBazi(person) {
+  const resolved = resolvePersonLunar(person);
+  if (!resolved.ok) return resolved;
+  const { timeKnown, lunar, solar, eightChar } = resolved;
 
   const year = pillarInfo(lunar.getYearGanIndexExact(), lunar.getYearZhiIndexExact());
   const month = pillarInfo(lunar.getMonthGanIndexExact(), lunar.getMonthZhiIndexExact());
@@ -156,10 +163,11 @@ function toDateKey(dateObj) {
   return `${y}-${m}-${d}`;
 }
 
-// 특정 사람의 일간(日干)을 기준으로, 내일부터 dayCount일간의 일진(日辰)과
-// 그날이 본인에게 어떤 십신(十神)에 해당하는지 계산한다. (오늘의 운세/내일 운세/N일 운세용)
+// 특정 사람의 일간(日干)을 기준으로, 오늘(또는 다른 기준일)부터 dayCount일간의 일진(日辰)과
+// 그날이 본인에게 어떤 십신(十神)에 해당하는지 계산한다. (오늘 운세/내일 운세용)
 // bazi: computeBazi(person)의 결과. startFrom: 기준일(보통 오늘, 로컬 자정 기준).
-export function computeFortuneDays(bazi, dayCount, startFrom = new Date()) {
+// startOffset: startFrom으로부터 며칠 뒤부터 셀지 (0=오늘부터, 1=내일부터).
+export function computeFortuneDays(bazi, dayCount, startFrom = new Date(), startOffset = 1) {
   if (typeof window === "undefined" || !window.Solar) {
     return { ok: false, error: "사주 계산 라이브러리를 불러오지 못했어요. 인터넷 연결을 확인해주세요." };
   }
@@ -169,7 +177,7 @@ export function computeFortuneDays(bazi, dayCount, startFrom = new Date()) {
 
   const dayMasterGanIndex = bazi.pillars.day.ganIndex;
   const days = [];
-  for (let i = 1; i <= dayCount; i++) {
+  for (let i = startOffset; i < startOffset + dayCount; i++) {
     const d = new Date(startFrom.getFullYear(), startFrom.getMonth(), startFrom.getDate() + i);
     let pillar;
     try {
@@ -227,6 +235,77 @@ export function formatBaziForPrompt(bazi) {
     `- 오행 분포(8자 중): ${wx}`,
     `- 띠: ${zodiac}띠`,
     `- 참고: ${solarText} / ${lunarText}`,
+  ];
+  return lines.join("\n");
+}
+
+// 대운(大運): 10년 단위로 바뀌는 큰 흐름. 월주(月柱)를 기준으로 순행/역행하며 60갑자를 따라간다.
+// 순행/역행과 대운수(첫 대운이 시작하는 나이)는 lunar-javascript의 절기 기반 계산(eightChar.getYun)을
+// 그대로 신뢰해 쓰고, 각 대운의 간지만 월주 기준으로 직접 계산해 한글 표기까지 붙인다.
+// person: { calendarType, birthDate, birthTime, timeUnknown, gender }
+export function computeDaewoon(person, cycleCount = 8) {
+  const resolved = resolvePersonLunar(person);
+  if (!resolved.ok) return resolved;
+  const { lunar, eightChar } = resolved;
+
+  const genderNum = person.gender === "male" ? 1 : 0;
+  let yun;
+  try {
+    yun = eightChar.getYun(genderNum, 1);
+  } catch (err) {
+    return { ok: false, error: "대운을 계산하지 못했어요." };
+  }
+
+  const forward = yun.isForward();
+  const dayGanIndex = eightChar.getDayGanIndex();
+  const monthGanIndex = lunar.getMonthGanIndexExact();
+  const monthZhiIndex = lunar.getMonthZhiIndexExact();
+
+  // 월주의 60갑자 순번(0~59)을 역산: n%10=월간, n%12=월지를 만족하는 n.
+  let monthJiaZi = -1;
+  for (let n = 0; n < 60; n++) {
+    if (n % 10 === monthGanIndex && n % 12 === monthZhiIndex) {
+      monthJiaZi = n;
+      break;
+    }
+  }
+  if (monthJiaZi < 0) {
+    return { ok: false, error: "대운 계산 중 월주 간지를 특정하지 못했어요." };
+  }
+
+  const raw = yun.getDaYun(cycleCount + 1);
+  const cycles = raw
+    .filter((d) => d.getIndex() >= 1) // index 0은 출생~첫 대운 시작 전 구간이라 실제 대운 간지가 없음
+    .map((d) => {
+      const idx = d.getIndex();
+      let offset = monthJiaZi + (forward ? idx : -idx);
+      offset = ((offset % 60) + 60) % 60;
+      const pillar = pillarInfo(offset % 10, offset % 12);
+      return {
+        index: idx,
+        startAge: d.getStartAge(),
+        endAge: d.getEndAge(),
+        startYear: d.getStartYear(),
+        endYear: d.getEndYear(),
+        pillar,
+        tenGod: tenGod(dayGanIndex, pillar.ganIndex),
+      };
+    });
+
+  return { ok: true, forward, startAge: cycles[0]?.startAge ?? null, cycles };
+}
+
+// Claude 프롬프트에 그대로 삽입할 대운 텍스트 블록. cycles만 해당 시기(초년/중년/말년)로 걸러서 넘긴다.
+export function formatDaewoonForPrompt(bazi, daewoon, cycles) {
+  if (!daewoon.ok) return "";
+  const lines = [
+    "[검증된 대운(大運) 계산 결과 — 아래 시기별 간지·십신은 이미 정확히 계산된 것이므로 그대로 인용하고, 절대 직접 다시 계산하거나 다른 간지를 만들어내지 마세요]",
+    `- 이 사람의 일간(본인 기준): ${bazi.dayMaster.gan}(${bazi.dayMaster.ganHanja}), 오행 ${bazi.dayMaster.wuxing}`,
+    `- 대운 진행 방향: ${daewoon.forward ? "순행(順行)" : "역행(逆行)"}`,
+    ...cycles.map(
+      (c) =>
+        `- 만 ${c.startAge}세~${c.endAge}세(${c.startYear}~${c.endYear}년): 대운 ${c.pillar.ganZhiKo}(${c.pillar.ganZhiHanja}) · 오행 ${c.pillar.ganWuxing}+${c.pillar.zhiWuxing} · 본인 일간 기준 십신=${c.tenGod}`
+    ),
   ];
   return lines.join("\n");
 }
