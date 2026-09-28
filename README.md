@@ -177,7 +177,7 @@ js/storage.js               사람/캐시/남은 젤리 데이터 CRUD (Supabase
 js/credits.js                풀이(=젤리 차감) 전 yes/no 확인 공통 헬퍼
 js/claude.js                 generate-reading Edge Function 스트리밍 호출 (API 키는 서버에만 있음)
 js/sajuCalc.js                만세력(vendor/lunar.js) 기반 사주 간지·신살(神殺) 정밀 계산
-js/shinsalInfo.js             신살 이름 클릭 시 보여줄 말풍선 설명 문구 (UI 텍스트)
+js/sajuInfo.js                 신살·12운성·납음·지장간 용어 클릭 시 보여줄 말풍선 설명 문구 (UI 텍스트)
 js/prompts.js                사주/궁합/운세 프롬프트 생성 (계산된 간지를 그대로 전달)
 js/markdown.js                마크다운 → HTML 변환
 js/vendor/lunar.js            사주/음력 계산 라이브러리 (lunar-javascript, MIT, 자체 호스팅)
