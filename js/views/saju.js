@@ -91,12 +91,10 @@ function renderDetailTable(bazi, { hiddenStems, stages, nayin, twelveShinsal }) 
     return row.stems
       .map((s) => {
         const plain = `${s.gan}<span class="detail-sub">${s.days}</span>`;
-        const sipsinDesc = getSajuInfo(s.tenGod);
-        if (!sipsinDesc) return plain;
-
-        const title = `${s.gan}(${s.ganHanja}) · ${s.tenGod} · ${s.days}일`;
-        const desc = `${sipsinDesc} ${getSajuInfo("일수")}`;
-        return `<span class="detail-cell-clickable" data-shinsal="${s.tenGod}" data-title="${title}" data-desc="${desc}">${plain}</span>`;
+        const title = `${s.gan}(${s.ganHanja}) · ${s.tenGod}`;
+        return getSajuInfo(s.tenGod)
+          ? `<span class="detail-cell-clickable" data-shinsal="${s.tenGod}" data-title="${title}">${plain}</span>`
+          : plain;
       })
       .join("<br/>");
   };
@@ -134,6 +132,7 @@ function renderDetailTable(bazi, { hiddenStems, stages, nayin, twelveShinsal }) 
         ${row("납음", nayinCell, { clickableCells: true })}
       </div>
       <div class="hint" style="margin-top:8px;">지장간·12운성·납음은 각 기둥 기준, 12신살은 연지(年支) 기준으로 계산돼요. 보라색 글자를 누르면 설명이 나와요.</div>
+      <div class="hint" style="margin-top:4px;">지장간 글자 옆 작은 숫자: ${getSajuInfo("일수")}</div>
     </div>`;
 }
 
@@ -227,7 +226,7 @@ export async function renderSaju(container, params) {
   function showPopoverFor(trigger) {
     const label = trigger.dataset.shinsal;
     const title = trigger.dataset.title || label;
-    const desc = trigger.dataset.desc || getSajuInfo(label);
+    const desc = getSajuInfo(label);
     if (!desc) return;
 
     popoverEl.innerHTML = `<div class="shinsal-popover-title">${title}</div><div class="shinsal-popover-body">${desc}</div>`;
