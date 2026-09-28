@@ -6,6 +6,7 @@ import { computeBazi, computeShinsal, computeHiddenStems, computeTwelveStages, c
 import { getSpaceId } from "../space.js";
 import { FORTUNE_RANGES } from "../prompts.js";
 import { confirmSpend, cancelledSpendHtml } from "../credits.js";
+import { SHINSAL_INFO } from "../shinsalInfo.js";
 
 function initial(name) {
   return name?.trim()?.[0] || "?";
@@ -93,10 +94,18 @@ function renderDetailTable(bazi, { hiddenStems, stages, nayin, twelveShinsal }) 
   const twelveCell = (key) => (twelveShinsal.ok && twelveShinsal.rows.find((r) => r.key === key)?.term) || "-";
   const nayinCell = (key) => (nayin.ok && nayin.rows.find((r) => r.key === key)?.ko) || "-";
 
-  const row = (label, cellFn) =>
+  const row = (label, cellFn, { clickable } = {}) =>
     `<div class="detail-row">
       <div class="detail-cell detail-row-name">${label}</div>
-      ${pillars.map(([, key]) => `<div class="detail-cell">${cellFn(key)}</div>`).join("")}
+      ${pillars
+        .map(([, key]) => {
+          const value = cellFn(key);
+          const isClickable = clickable && value !== "-" && SHINSAL_INFO[value];
+          return isClickable
+            ? `<div class="detail-cell detail-cell-clickable" data-shinsal="${value}">${value}</div>`
+            : `<div class="detail-cell">${value}</div>`;
+        })
+        .join("")}
     </div>`;
 
   return `
@@ -109,10 +118,10 @@ function renderDetailTable(bazi, { hiddenStems, stages, nayin, twelveShinsal }) 
         </div>
         ${row("지장간", hiddenCell)}
         ${row("12운성", stageCell)}
-        ${row("12신살", twelveCell)}
+        ${row("12신살", twelveCell, { clickable: true })}
         ${row("납음", nayinCell)}
       </div>
-      <div class="hint" style="margin-top:8px;">지장간·12운성·납음은 각 기둥 기준, 12신살은 연지(年支) 기준으로 계산돼요.</div>
+      <div class="hint" style="margin-top:8px;">지장간·12운성·납음은 각 기둥 기준, 12신살은 연지(年支) 기준으로 계산돼요. 12신살 글자를 누르면 설명이 나와요.</div>
     </div>`;
 }
 
@@ -120,13 +129,16 @@ function renderShinsalCard(shinsal) {
   if (!shinsal.ok) return "";
   const chips =
     shinsal.items.length > 0
-      ? shinsal.items.map((it) => `<span class="wx-chip shinsal-chip">${it.label}</span>`).join("")
+      ? shinsal.items
+          .map((it) => `<span class="wx-chip shinsal-chip" data-shinsal="${it.label}">${it.label}</span>`)
+          .join("")
       : `<span class="hint" style="margin:0;">특별히 두드러지는 신살은 없어요.</span>`;
 
   return `
     <div class="card bazi-card" style="margin-top:10px;">
       <div class="section-title" style="margin:0 0 10px;">신살(神殺) 🐾</div>
       <div class="wx-row" style="margin-top:0;">${chips}</div>
+      ${shinsal.items.length > 0 ? `<div class="hint" style="margin-top:8px;">이름을 누르면 설명이 나와요.</div>` : ""}
     </div>`;
 }
 
@@ -189,7 +201,60 @@ export async function renderSaju(container, params) {
       </div>
     </div>
     <div class="toast" id="saju-toast"></div>
+    <div class="shinsal-popover" id="shinsal-popover"></div>
   `;
+
+  const popoverEl = container.querySelector("#shinsal-popover");
+  let popoverTrigger = null;
+
+  function hidePopover() {
+    popoverEl.classList.remove("show");
+    popoverTrigger = null;
+  }
+
+  function showPopoverFor(trigger) {
+    const label = trigger.dataset.shinsal;
+    const desc = SHINSAL_INFO[label];
+    if (!desc) return;
+
+    popoverEl.innerHTML = `<div class="shinsal-popover-title">${label}</div><div class="shinsal-popover-body">${desc}</div>`;
+    popoverEl.classList.remove("above");
+    popoverEl.classList.add("show");
+
+    const rect = trigger.getBoundingClientRect();
+    const maxWidth = 240;
+    const margin = 12;
+    let left = rect.left + rect.width / 2 - maxWidth / 2;
+    left = Math.max(margin, Math.min(left, window.innerWidth - maxWidth - margin));
+
+    const spaceBelow = window.innerHeight - rect.bottom;
+    if (spaceBelow < 120 && rect.top > 120) {
+      popoverEl.classList.add("above");
+      popoverEl.style.top = "";
+      popoverEl.style.bottom = `${window.innerHeight - rect.top + 10}px`;
+    } else {
+      popoverEl.style.bottom = "";
+      popoverEl.style.top = `${rect.bottom + 10}px`;
+    }
+    popoverEl.style.left = `${left}px`;
+    popoverEl.style.setProperty("--arrow-left", `${rect.left + rect.width / 2 - left}px`);
+  }
+
+  container.addEventListener("click", (e) => {
+    const trigger = e.target.closest("[data-shinsal]");
+    if (trigger) {
+      if (popoverTrigger === trigger && popoverEl.classList.contains("show")) {
+        hidePopover();
+      } else {
+        popoverTrigger = trigger;
+        showPopoverFor(trigger);
+      }
+      return;
+    }
+    if (!e.target.closest("#shinsal-popover")) {
+      hidePopover();
+    }
+  });
 
   container.querySelector("#edit-btn").addEventListener("click", () => {
     location.hash = `#/person/${person.id}/edit`;
