@@ -2,7 +2,7 @@ import { getPerson, getCachedReading, setCachedReading } from "../storage.js";
 import { streamMessage, ClaudeApiError } from "../claude.js";
 import { buildPersonalPrompt } from "../prompts.js";
 import { renderMarkdown } from "../markdown.js";
-import { computeBazi } from "../sajuCalc.js";
+import { computeBazi, computeShinsal, computeHiddenStems, computeTwelveStages, computeNayin, computeTwelveShinsal } from "../sajuCalc.js";
 import { getSpaceId } from "../space.js";
 import { FORTUNE_RANGES } from "../prompts.js";
 import { confirmSpend, cancelledSpendHtml } from "../credits.js";
@@ -68,6 +68,68 @@ function renderBaziCard(bazi) {
     </div>`;
 }
 
+function renderDetailTable(bazi, { hiddenStems, stages, nayin, twelveShinsal }) {
+  if (!bazi.ok) return "";
+
+  const pillars = bazi.pillars.time
+    ? [
+        ["연주", "year"],
+        ["월주", "month"],
+        ["일주", "day"],
+        ["시주", "time"],
+      ]
+    : [
+        ["연주", "year"],
+        ["월주", "month"],
+        ["일주", "day"],
+      ];
+
+  const hiddenCell = (key) => {
+    const row = hiddenStems.ok ? hiddenStems.rows.find((r) => r.key === key) : null;
+    if (!row) return "-";
+    return row.stems.map((s) => `${s.gan}<span class="detail-sub">${s.days}</span>`).join("<br/>");
+  };
+  const stageCell = (key) => (stages.ok && stages.rows.find((r) => r.key === key)?.stage) || "-";
+  const twelveCell = (key) => (twelveShinsal.ok && twelveShinsal.rows.find((r) => r.key === key)?.term) || "-";
+  const nayinCell = (key) => (nayin.ok && nayin.rows.find((r) => r.key === key)?.ko) || "-";
+
+  const row = (label, cellFn) =>
+    `<div class="detail-row">
+      <div class="detail-cell detail-row-name">${label}</div>
+      ${pillars.map(([, key]) => `<div class="detail-cell">${cellFn(key)}</div>`).join("")}
+    </div>`;
+
+  return `
+    <div class="card bazi-card" style="margin-top:10px;">
+      <div class="section-title" style="margin:0 0 10px;">정밀 조견표 🐾</div>
+      <div class="detail-table" style="--detail-cols:${pillars.length};">
+        <div class="detail-row detail-row-head">
+          <div class="detail-cell detail-row-name"></div>
+          ${pillars.map(([label]) => `<div class="detail-cell detail-head">${label}</div>`).join("")}
+        </div>
+        ${row("지장간", hiddenCell)}
+        ${row("12운성", stageCell)}
+        ${row("12신살", twelveCell)}
+        ${row("납음", nayinCell)}
+      </div>
+      <div class="hint" style="margin-top:8px;">지장간·12운성·납음은 각 기둥 기준, 12신살은 연지(年支) 기준으로 계산돼요.</div>
+    </div>`;
+}
+
+function renderShinsalCard(shinsal) {
+  if (!shinsal.ok) return "";
+  const chips =
+    shinsal.items.length > 0
+      ? shinsal.items.map((it) => `<span class="wx-chip shinsal-chip">${it.label}</span>`).join("")
+      : `<span class="hint" style="margin:0;">특별히 두드러지는 신살은 없어요.</span>`;
+
+  return `
+    <div class="card bazi-card" style="margin-top:10px;">
+      <div class="section-title" style="margin:0 0 10px;">신살(神殺) 🐾</div>
+      <div class="wx-row" style="margin-top:0;">${chips}</div>
+    </div>`;
+}
+
 export async function renderSaju(container, params) {
   container.innerHTML = `<div class="page"><div class="loading-row"><div class="spinner"></div> 불러오는 중...</div></div>`;
 
@@ -86,6 +148,11 @@ export async function renderSaju(container, params) {
 
   const cacheKey = `saju:${person.id}`;
   const bazi = computeBazi(person);
+  const shinsal = computeShinsal(bazi);
+  const hiddenStems = computeHiddenStems(bazi);
+  const stages = computeTwelveStages(bazi);
+  const nayin = computeNayin(bazi);
+  const twelveShinsal = computeTwelveShinsal(bazi);
 
   container.innerHTML = `
     <div class="page">
@@ -105,6 +172,8 @@ export async function renderSaju(container, params) {
       </div>
 
       ${renderBaziCard(bazi)}
+      ${renderShinsalCard(shinsal)}
+      ${renderDetailTable(bazi, { hiddenStems, stages, nayin, twelveShinsal })}
 
       <div class="section-title" style="margin:16px 2px 8px;">기간별 운세 보기 🐾</div>
       <div class="pill-group" style="margin-bottom:4px;">

@@ -712,6 +712,58 @@ button {
   margin-top: 2px;
 }
 
+/* ---------- Detail table (지장간/12운성/납음/12신살) ---------- */
+
+.detail-table {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-x: auto;
+}
+
+.detail-row {
+  display: grid;
+  grid-template-columns: 52px repeat(var(--detail-cols, 4), 1fr);
+  gap: 4px;
+  align-items: center;
+}
+
+.detail-row-head {
+  padding-bottom: 2px;
+  border-bottom: 2px solid var(--border);
+}
+
+.detail-cell {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text);
+  padding: 6px 2px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  line-height: 1.5;
+}
+
+.detail-row-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-faint);
+  background: none;
+  text-align: left;
+  padding-left: 2px;
+}
+
+.detail-head {
+  font-weight: 700;
+  color: var(--text-dim);
+  background: none;
+}
+
+.detail-sub {
+  font-size: 10px;
+  color: var(--text-faint);
+  margin-left: 1px;
+}
+
 .wx-row {
   display: flex;
   flex-wrap: wrap;
@@ -734,6 +786,8 @@ button {
 .wx-토 { border-color: var(--pastel-peach-deep); background: var(--pastel-peach); color: #a5601e; }
 .wx-금 { border-color: var(--pastel-yellow-deep); background: var(--pastel-yellow); color: #9a7a0a; }
 .wx-수 { border-color: var(--pastel-blue-deep); background: var(--pastel-blue); color: #2f6a9a; }
+
+.shinsal-chip { border-color: var(--pastel-purple-deep); background: var(--pastel-purple); color: #6a3fa0; }
 
 /* ---------- Compat score heart ---------- */
 

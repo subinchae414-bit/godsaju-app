@@ -22,6 +22,14 @@ function zhiWuxing(zhiIndex) {
   return WUXING_KO_BY_ELEMENT[ZHI_ELEMENT[zhiIndex]];
 }
 
+// 갑자(甲子)부터 시작하는 60갑자 순번(0~59)을 역산: n%10=간, n%12=지를 만족하는 n.
+function jiaZiIndex(ganIndex, zhiIndex) {
+  for (let n = 0; n < 60; n++) {
+    if (n % 10 === ganIndex && n % 12 === zhiIndex) return n;
+  }
+  return -1;
+}
+
 function pillarInfo(ganIndex, zhiIndex) {
   return {
     ganIndex,
@@ -261,14 +269,7 @@ export function computeDaewoon(person, cycleCount = 8) {
   const monthGanIndex = lunar.getMonthGanIndexExact();
   const monthZhiIndex = lunar.getMonthZhiIndexExact();
 
-  // 월주의 60갑자 순번(0~59)을 역산: n%10=월간, n%12=월지를 만족하는 n.
-  let monthJiaZi = -1;
-  for (let n = 0; n < 60; n++) {
-    if (n % 10 === monthGanIndex && n % 12 === monthZhiIndex) {
-      monthJiaZi = n;
-      break;
-    }
-  }
+  const monthJiaZi = jiaZiIndex(monthGanIndex, monthZhiIndex);
   if (monthJiaZi < 0) {
     return { ok: false, error: "대운 계산 중 월주 간지를 특정하지 못했어요." };
   }
@@ -306,6 +307,376 @@ export function formatDaewoonForPrompt(bazi, daewoon, cycles) {
       (c) =>
         `- 만 ${c.startAge}세~${c.endAge}세(${c.startYear}~${c.endYear}년): 대운 ${c.pillar.ganZhiKo}(${c.pillar.ganZhiHanja}) · 오행 ${c.pillar.ganWuxing}+${c.pillar.zhiWuxing} · 본인 일간 기준 십신=${c.tenGod}`
     ),
+  ];
+  return lines.join("\n");
+}
+
+// ---------- 신살(神殺) ----------
+// 고전 명리서에 흔히 쓰이는 표를 그대로 구현. 신살은 유파에 따라 기준(년지/일지)이나 포함 여부가
+// 갈리는 경우가 많은데, 여기서는 도화/역마/화개는 현대 사주 앱에서 널리 쓰이는 일지(日支) 기준으로,
+// 천을귀인·양인살은 일간(日干) 기준으로, 괴강·백호·공망은 일주(日柱) 기준으로, 원진살은 네 기둥의
+// 지지 조합으로 계산한다.
+
+const PILLAR_LABEL_KO = { year: "연주", month: "월주", day: "일주", time: "시주" };
+
+// 삼합 그룹: 0=신자진(申子辰) 1=사유축(巳酉丑) 2=인오술(寅午戌) 3=해묘미(亥卯未). zhiIndex % 4로 판별된다.
+const TAOHUA_BY_GROUP = [9, 6, 3, 0]; // 桃花: 유, 오, 묘, 자
+const YIMA_BY_GROUP = [2, 11, 8, 5]; // 驛馬: 인, 해, 신, 사
+const HUAGAI_BY_GROUP = [4, 1, 10, 7]; // 華蓋: 진, 축, 술, 미
+
+// 천을귀인: 일간(ganIndex 0~9 = 갑을병정무기경신임계) 기준으로 해당하는 두 지지.
+const TIANYI_BY_GAN = [
+  [1, 7], // 갑
+  [0, 8], // 을
+  [11, 9], // 병
+  [11, 9], // 정
+  [1, 7], // 무
+  [0, 8], // 기
+  [1, 7], // 경
+  [2, 6], // 신
+  [5, 3], // 임
+  [5, 3], // 계
+];
+
+// 양인살: 양간(갑병무경임)에만 적용되는 것이 일반적.
+const YANGREN_BY_GAN = { 0: 3, 2: 6, 4: 6, 6: 9, 8: 0 };
+
+// 괴강살: 일주 간지가 이 4개 중 하나. [ganIndex, zhiIndex]
+const GUIGANG_PILLARS = [
+  [6, 4], // 경진
+  [6, 10], // 경술
+  [8, 4], // 임진
+  [4, 10], // 무술
+];
+
+// 백호살(백호대살): 네 기둥 중 하나라도 이 7개 간지에 해당하면.
+const BAIHU_PILLARS = [
+  [0, 4], // 갑진
+  [1, 7], // 을미
+  [2, 10], // 병술
+  [3, 1], // 정축
+  [4, 4], // 무진
+  [8, 10], // 임술
+  [9, 1], // 계축
+];
+
+// 원진살: 서로 원진 관계인 지지 쌍.
+const WONJIN_ZHI_PAIRS = [
+  [0, 7], // 자-미
+  [1, 6], // 축-오
+  [2, 9], // 인-유
+  [3, 8], // 묘-신
+  [4, 11], // 진-해
+  [5, 10], // 사-술
+];
+
+// 공망(空亡): 기준 간지가 속한 60갑자 순(旬)에서 빠지는 두 지지.
+function xunKongZhiIndexes(ganIndex, zhiIndex) {
+  const n = jiaZiIndex(ganIndex, zhiIndex);
+  if (n < 0) return [];
+  const xun = Math.floor(n / 10);
+  return [(xun * 10 + 10) % 12, (xun * 10 + 11) % 12];
+}
+
+// bazi: computeBazi(person)의 결과.
+export function computeShinsal(bazi) {
+  if (!bazi.ok) return { ok: false, error: bazi.error };
+
+  const { pillars } = bazi;
+  const pillarList = [
+    ["year", pillars.year],
+    ["month", pillars.month],
+    ["day", pillars.day],
+    ...(pillars.time ? [["time", pillars.time]] : []),
+  ];
+
+  const items = [];
+  const addItem = (key, label, hanja, hitKeys) => {
+    if (hitKeys.length === 0) return;
+    items.push({ key, label, hanja, pillars: hitKeys });
+  };
+  const zhiMatches = (targetZhi) => pillarList.filter(([, p]) => p.zhiIndex === targetZhi).map(([k]) => k);
+
+  const dayGanIndex = pillars.day.ganIndex;
+  const dayZhiIndex = pillars.day.zhiIndex;
+  const group = dayZhiIndex % 4;
+
+  addItem("taohua", "도화살", "桃花殺", zhiMatches(TAOHUA_BY_GROUP[group]));
+  addItem("yima", "역마살", "驛馬殺", zhiMatches(YIMA_BY_GROUP[group]));
+  addItem("huagai", "화개살", "華蓋殺", zhiMatches(HUAGAI_BY_GROUP[group]));
+
+  const tianyiZhis = TIANYI_BY_GAN[dayGanIndex];
+  addItem(
+    "tianyi",
+    "천을귀인",
+    "天乙貴人",
+    pillarList.filter(([, p]) => tianyiZhis.includes(p.zhiIndex)).map(([k]) => k)
+  );
+
+  if (dayGanIndex in YANGREN_BY_GAN) {
+    addItem("yangren", "양인살", "羊刃殺", zhiMatches(YANGREN_BY_GAN[dayGanIndex]));
+  }
+
+  if (GUIGANG_PILLARS.some(([g, z]) => g === dayGanIndex && z === dayZhiIndex)) {
+    items.push({ key: "guigang", label: "괴강살", hanja: "魁罡殺", pillars: ["day"] });
+  }
+
+  addItem(
+    "baihu",
+    "백호살",
+    "白虎殺",
+    pillarList.filter(([, p]) => BAIHU_PILLARS.some(([g, z]) => g === p.ganIndex && z === p.zhiIndex)).map(([k]) => k)
+  );
+
+  const wonjinPillars = new Set();
+  for (let i = 0; i < pillarList.length; i++) {
+    for (let j = i + 1; j < pillarList.length; j++) {
+      const [keyA, pillarA] = pillarList[i];
+      const [keyB, pillarB] = pillarList[j];
+      const isWonjin = WONJIN_ZHI_PAIRS.some(
+        ([a, b]) =>
+          (pillarA.zhiIndex === a && pillarB.zhiIndex === b) || (pillarA.zhiIndex === b && pillarB.zhiIndex === a)
+      );
+      if (isWonjin) {
+        wonjinPillars.add(keyA);
+        wonjinPillars.add(keyB);
+      }
+    }
+  }
+  addItem("wonjin", "원진살", "怨嗔殺", Array.from(wonjinPillars));
+
+  const kongZhis = xunKongZhiIndexes(dayGanIndex, dayZhiIndex);
+  addItem(
+    "gongmang",
+    "공망",
+    "空亡",
+    pillarList.filter(([key, p]) => key !== "day" && kongZhis.includes(p.zhiIndex)).map(([k]) => k)
+  );
+
+  return { ok: true, items };
+}
+
+// Claude 프롬프트에 그대로 삽입할 신살 텍스트 블록.
+export function formatShinsalForPrompt(shinsal) {
+  if (!shinsal.ok) return "";
+  if (shinsal.items.length === 0) {
+    return "[검증된 신살(神殺) 계산 결과 — 이 사주에는 아래에 해당하는 대표적인 신살이 없습니다. 없는 신살을 지어내서 언급하지 마세요.]";
+  }
+  const lines = [
+    "[검증된 신살(神殺) 계산 결과 — 아래 목록은 이미 정확히 계산된 것이므로 그대로 인용하고, 절대 목록에 없는 다른 신살을 지어내거나 언급하지 마세요]",
+    ...shinsal.items.map(
+      (it) => `- ${it.label}(${it.hanja}): ${it.pillars.map((k) => PILLAR_LABEL_KO[k]).join("·")}`
+    ),
+  ];
+  return lines.join("\n");
+}
+
+// ---------- 지장간(支藏干) ----------
+// 지지 속에 숨어있는 천간과 그 기운이 한 달(30일) 중 며칠을 차지하는지(여기/중기/정기)를 나타내는
+// 고전 표(연해자평 계열). 마지막 항목이 그 지지의 "정기(正氣)" — 가장 비중이 큰 기운이다.
+const HIDDEN_STEMS_BY_ZHI = [
+  [[8, 10], [9, 20]], // 자: 임10 계20
+  [[9, 9], [7, 3], [5, 18]], // 축: 계9 신3 기18
+  [[4, 7], [2, 7], [0, 16]], // 인: 무7 병7 갑16
+  [[0, 10], [1, 20]], // 묘: 갑10 을20
+  [[1, 9], [9, 3], [4, 18]], // 진: 을9 계3 무18
+  [[4, 7], [6, 7], [2, 16]], // 사: 무7 경7 병16
+  [[2, 10], [5, 9], [3, 11]], // 오: 병10 기9 정11
+  [[3, 9], [1, 3], [5, 18]], // 미: 정9 을3 기18
+  [[4, 7], [8, 7], [6, 16]], // 신: 무7 임7 경16
+  [[6, 10], [7, 20]], // 유: 경10 신20
+  [[7, 9], [3, 3], [4, 18]], // 술: 신9 정3 무18
+  [[4, 7], [0, 7], [8, 16]], // 해: 무7 갑7 임16
+];
+
+// bazi: computeBazi(person)의 결과. 각 기둥마다 지지 속 지장간 목록(정기가 마지막)을 반환.
+export function computeHiddenStems(bazi) {
+  if (!bazi.ok) return { ok: false, error: bazi.error };
+  const { pillars, dayMaster } = bazi;
+  const dayGanIndex = pillars.day.ganIndex;
+
+  const pillarList = [
+    ["year", pillars.year],
+    ["month", pillars.month],
+    ["day", pillars.day],
+    ...(pillars.time ? [["time", pillars.time]] : []),
+  ];
+
+  const rows = pillarList.map(([key, p]) => ({
+    key,
+    stems: HIDDEN_STEMS_BY_ZHI[p.zhiIndex].map(([ganIndex, days]) => ({
+      ganIndex,
+      gan: GAN_KO[ganIndex],
+      ganHanja: GAN_HANJA[ganIndex],
+      days,
+      wuxing: ganWuxing(ganIndex),
+      tenGod: tenGod(dayGanIndex, ganIndex),
+    })),
+  }));
+
+  return { ok: true, dayMasterGan: dayMaster.gan, rows };
+}
+
+// ---------- 십이운성(十二運星) ----------
+// 일간(日干)이 각 기둥의 지지 위에서 어떤 생애 단계에 해당하는지를 나타내는 고전 표.
+// 양간은 장생 지지에서 순행(12지지를 시계방향으로), 음간은 역행(반시계방향)한다.
+// 무기(戊己)는 병정(丙丁)과 같은 자리를 쓰는 화토동법(火土同法)을 따른다.
+const TWELVE_STAGE_NAMES = ["장생", "목욕", "관대", "건록", "제왕", "쇠", "병", "사", "묘", "절", "태", "양"];
+const CHANGSHENG_BY_GAN = [
+  { startZhi: 11, forward: true }, // 갑
+  { startZhi: 6, forward: false }, // 을
+  { startZhi: 2, forward: true }, // 병
+  { startZhi: 9, forward: false }, // 정
+  { startZhi: 2, forward: true }, // 무 (화토동법)
+  { startZhi: 9, forward: false }, // 기 (화토동법)
+  { startZhi: 5, forward: true }, // 경
+  { startZhi: 0, forward: false }, // 신
+  { startZhi: 8, forward: true }, // 임
+  { startZhi: 3, forward: false }, // 계
+];
+
+// bazi: computeBazi(person)의 결과. 각 기둥의 지지가 일간 기준 어떤 운성 단계인지 반환.
+export function computeTwelveStages(bazi) {
+  if (!bazi.ok) return { ok: false, error: bazi.error };
+  const { pillars } = bazi;
+  const { startZhi, forward } = CHANGSHENG_BY_GAN[pillars.day.ganIndex];
+
+  const pillarList = [
+    ["year", pillars.year],
+    ["month", pillars.month],
+    ["day", pillars.day],
+    ...(pillars.time ? [["time", pillars.time]] : []),
+  ];
+
+  const rows = pillarList.map(([key, p]) => {
+    const diff = forward ? p.zhiIndex - startZhi : startZhi - p.zhiIndex;
+    const stepIndex = ((diff % 12) + 12) % 12;
+    return { key, stage: TWELVE_STAGE_NAMES[stepIndex] };
+  });
+
+  return { ok: true, rows };
+}
+
+// ---------- 납음(納音) 오행 ----------
+// 60갑자를 둘씩 묶어 붙이는 고전 오행 이름(연해자평 계열). n=jiaZiIndex를 2로 나눈 값이 배열 인덱스.
+const NAYIN_TABLE = [
+  { ko: "해중금", hanja: "海中金" },
+  { ko: "노중화", hanja: "爐中火" },
+  { ko: "대림목", hanja: "大林木" },
+  { ko: "노방토", hanja: "路旁土" },
+  { ko: "검봉금", hanja: "劍鋒金" },
+  { ko: "산두화", hanja: "山頭火" },
+  { ko: "간하수", hanja: "澗下水" },
+  { ko: "성두토", hanja: "城頭土" },
+  { ko: "백랍금", hanja: "白蠟金" },
+  { ko: "양류목", hanja: "楊柳木" },
+  { ko: "천중수", hanja: "泉中水" },
+  { ko: "옥상토", hanja: "屋上土" },
+  { ko: "벽력화", hanja: "霹靂火" },
+  { ko: "송백목", hanja: "松柏木" },
+  { ko: "장류수", hanja: "長流水" },
+  { ko: "사중금", hanja: "沙中金" },
+  { ko: "산하화", hanja: "山下火" },
+  { ko: "평지목", hanja: "平地木" },
+  { ko: "벽상토", hanja: "壁上土" },
+  { ko: "금박금", hanja: "金箔金" },
+  { ko: "복등화", hanja: "覆燈火" },
+  { ko: "천하수", hanja: "天河水" },
+  { ko: "대역토", hanja: "大驛土" },
+  { ko: "차천금", hanja: "釵釧金" },
+  { ko: "상자목", hanja: "桑柘木" },
+  { ko: "대계수", hanja: "大溪水" },
+  { ko: "사중토", hanja: "沙中土" },
+  { ko: "천상화", hanja: "天上火" },
+  { ko: "석류목", hanja: "石榴木" },
+  { ko: "대해수", hanja: "大海水" },
+];
+
+// bazi: computeBazi(person)의 결과. 각 기둥 간지의 납음오행을 반환.
+export function computeNayin(bazi) {
+  if (!bazi.ok) return { ok: false, error: bazi.error };
+  const { pillars } = bazi;
+
+  const pillarList = [
+    ["year", pillars.year],
+    ["month", pillars.month],
+    ["day", pillars.day],
+    ...(pillars.time ? [["time", pillars.time]] : []),
+  ];
+
+  const rows = pillarList.map(([key, p]) => {
+    const n = jiaZiIndex(p.ganIndex, p.zhiIndex);
+    const entry = NAYIN_TABLE[Math.floor(n / 2)];
+    return { key, ...entry };
+  });
+
+  return { ok: true, rows };
+}
+
+// ---------- 십이신살(十二神殺) ----------
+// 도화/역마/화개(일지 기준, computeShinsal)와는 별개로, 년지(年支)가 속한 삼합 그룹을 기준으로
+// 12지지 각각에 겁살~화개살까지 하나씩 이름을 매기는 전통 체계. 네 기둥 모두 항상 결과가 있다.
+const TWELVE_SHINSAL_TERMS = [
+  "겁살", "재살", "천살", "지살", "년살", "월살", "망신살", "장성살", "반안살", "역마살", "육해살", "화개살",
+];
+
+// bazi: computeBazi(person)의 결과. 년지 기준으로 각 기둥의 12신살을 반환.
+export function computeTwelveShinsal(bazi) {
+  if (!bazi.ok) return { ok: false, error: bazi.error };
+  const { pillars } = bazi;
+  const group = pillars.year.zhiIndex % 4;
+  const start = (HUAGAI_BY_GROUP[group] + 1) % 12;
+
+  const pillarList = [
+    ["year", pillars.year],
+    ["month", pillars.month],
+    ["day", pillars.day],
+    ...(pillars.time ? [["time", pillars.time]] : []),
+  ];
+
+  const rows = pillarList.map(([key, p]) => {
+    const offset = ((p.zhiIndex - start) % 12 + 12) % 12;
+    return { key, term: TWELVE_SHINSAL_TERMS[offset] };
+  });
+
+  return { ok: true, rows };
+}
+
+// Claude 프롬프트에 그대로 삽입할 지장간/십이운성/납음/십이신살 종합 텍스트 블록.
+export function formatDetailTableForPrompt(bazi, { hiddenStems, stages, nayin, twelveShinsal }) {
+  if (!bazi.ok) return "";
+  const pillarLine = (key) => {
+    const parts = [];
+    if (stages?.ok) {
+      const s = stages.rows.find((r) => r.key === key);
+      if (s) parts.push(`십이운성=${s.stage}`);
+    }
+    if (twelveShinsal?.ok) {
+      const t = twelveShinsal.rows.find((r) => r.key === key);
+      if (t) parts.push(`십이신살=${t.term}`);
+    }
+    if (nayin?.ok) {
+      const n = nayin.rows.find((r) => r.key === key);
+      if (n) parts.push(`납음=${n.ko}(${n.hanja})`);
+    }
+    if (hiddenStems?.ok) {
+      const h = hiddenStems.rows.find((r) => r.key === key);
+      if (h) {
+        const stemText = h.stems
+          .map((s) => `${s.gan}(${s.ganHanja}, ${s.days}일, 십신=${s.tenGod})`)
+          .join(" · ");
+        parts.push(`지장간=${stemText}`);
+      }
+    }
+    return parts.join(" / ");
+  };
+
+  const lines = [
+    "[검증된 지장간·십이운성·납음·십이신살 계산 결과 — 이미 정확히 계산된 것이므로 그대로 인용하고, 절대 직접 다시 계산하거나 다른 값을 지어내지 마세요. 전부 억지로 언급할 필요는 없고, 사주를 더 풍부하게 설명하는 데 자연스럽게 참고만 하세요]",
+    `- 연주: ${pillarLine("year")}`,
+    `- 월주: ${pillarLine("month")}`,
+    `- 일주: ${pillarLine("day")}`,
+    ...(bazi.pillars.time ? [`- 시주: ${pillarLine("time")}`] : []),
   ];
   return lines.join("\n");
 }

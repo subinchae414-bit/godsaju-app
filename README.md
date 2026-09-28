@@ -176,7 +176,7 @@ js/supabaseClient.js        Supabase 클라이언트 생성
 js/storage.js               사람/캐시/남은 젤리 데이터 CRUD (Supabase)
 js/credits.js                풀이(=젤리 차감) 전 yes/no 확인 공통 헬퍼
 js/claude.js                 generate-reading Edge Function 스트리밍 호출 (API 키는 서버에만 있음)
-js/sajuCalc.js                만세력(vendor/lunar.js) 기반 사주 간지 정밀 계산
+js/sajuCalc.js                만세력(vendor/lunar.js) 기반 사주 간지·신살(神殺) 정밀 계산
 js/prompts.js                사주/궁합/운세 프롬프트 생성 (계산된 간지를 그대로 전달)
 js/markdown.js                마크다운 → HTML 변환
 js/vendor/lunar.js            사주/음력 계산 라이브러리 (lunar-javascript, MIT, 자체 호스팅)
