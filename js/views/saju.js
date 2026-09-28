@@ -6,7 +6,7 @@ import { computeBazi, computeShinsal, computeHiddenStems, computeTwelveStages, c
 import { getSpaceId } from "../space.js";
 import { FORTUNE_RANGES } from "../prompts.js";
 import { confirmSpend, cancelledSpendHtml } from "../credits.js";
-import { SHINSAL_INFO } from "../shinsalInfo.js";
+import { getSajuInfo } from "../sajuInfo.js";
 
 function initial(name) {
   return name?.trim()?.[0] || "?";
@@ -94,19 +94,21 @@ function renderDetailTable(bazi, { hiddenStems, stages, nayin, twelveShinsal }) 
   const twelveCell = (key) => (twelveShinsal.ok && twelveShinsal.rows.find((r) => r.key === key)?.term) || "-";
   const nayinCell = (key) => (nayin.ok && nayin.rows.find((r) => r.key === key)?.ko) || "-";
 
-  const row = (label, cellFn, { clickable } = {}) =>
-    `<div class="detail-row">
-      <div class="detail-cell detail-row-name">${label}</div>
-      ${pillars
-        .map(([, key]) => {
-          const value = cellFn(key);
-          const isClickable = clickable && value !== "-" && SHINSAL_INFO[value];
-          return isClickable
-            ? `<div class="detail-cell detail-cell-clickable" data-shinsal="${value}">${value}</div>`
-            : `<div class="detail-cell">${value}</div>`;
-        })
-        .join("")}
-    </div>`;
+  const row = (label, cellFn, { clickableCells, clickableLabel } = {}) => {
+    const labelHtml = clickableLabel
+      ? `<div class="detail-cell detail-row-name detail-cell-clickable" data-shinsal="${label}">${label}</div>`
+      : `<div class="detail-cell detail-row-name">${label}</div>`;
+    const cellsHtml = pillars
+      .map(([, key]) => {
+        const value = cellFn(key);
+        const isClickable = clickableCells && value !== "-" && getSajuInfo(value);
+        return isClickable
+          ? `<div class="detail-cell detail-cell-clickable" data-shinsal="${value}">${value}</div>`
+          : `<div class="detail-cell">${value}</div>`;
+      })
+      .join("");
+    return `<div class="detail-row">${labelHtml}${cellsHtml}</div>`;
+  };
 
   return `
     <div class="card bazi-card" style="margin-top:10px;">
@@ -116,12 +118,12 @@ function renderDetailTable(bazi, { hiddenStems, stages, nayin, twelveShinsal }) 
           <div class="detail-cell detail-row-name"></div>
           ${pillars.map(([label]) => `<div class="detail-cell detail-head">${label}</div>`).join("")}
         </div>
-        ${row("지장간", hiddenCell)}
-        ${row("12운성", stageCell)}
-        ${row("12신살", twelveCell, { clickable: true })}
-        ${row("납음", nayinCell)}
+        ${row("지장간", hiddenCell, { clickableLabel: true })}
+        ${row("12운성", stageCell, { clickableCells: true })}
+        ${row("12신살", twelveCell, { clickableCells: true })}
+        ${row("납음", nayinCell, { clickableCells: true })}
       </div>
-      <div class="hint" style="margin-top:8px;">지장간·12운성·납음은 각 기둥 기준, 12신살은 연지(年支) 기준으로 계산돼요. 12신살 글자를 누르면 설명이 나와요.</div>
+      <div class="hint" style="margin-top:8px;">지장간·12운성·납음은 각 기둥 기준, 12신살은 연지(年支) 기준으로 계산돼요. 보라색 글자를 누르면 설명이 나와요.</div>
     </div>`;
 }
 
@@ -214,7 +216,7 @@ export async function renderSaju(container, params) {
 
   function showPopoverFor(trigger) {
     const label = trigger.dataset.shinsal;
-    const desc = SHINSAL_INFO[label];
+    const desc = getSajuInfo(label);
     if (!desc) return;
 
     popoverEl.innerHTML = `<div class="shinsal-popover-title">${label}</div><div class="shinsal-popover-body">${desc}</div>`;
