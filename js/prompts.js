@@ -11,6 +11,11 @@ import {
   formatDaewoonForPrompt,
   computeShinsal,
   formatShinsalForPrompt,
+  computeHiddenStems,
+  computeTwelveStages,
+  computeNayin,
+  computeTwelveShinsal,
+  formatDetailTableForPrompt,
 } from "./sajuCalc.js";
 
 export const FORTUNE_RANGES = {
@@ -54,19 +59,23 @@ const BASE_SYSTEM = `당신은 사주명리학(四柱命理學)에 정통한 전
 export function buildPersonalPrompt(person) {
   const bazi = requireBazi(person);
   const shinsal = computeShinsal(bazi);
+  const hiddenStems = computeHiddenStems(bazi);
+  const stages = computeTwelveStages(bazi);
+  const nayin = computeNayin(bazi);
+  const twelveShinsal = computeTwelveShinsal(bazi);
 
   const system = `${BASE_SYSTEM}
 
 지금은 한 사람의 개인 사주를 해석하는 요청입니다. 아래 구성을 따르세요.
 ## 사주 개요 (연주/월주/일주/시주를 간지와 함께 소개)
 ## 오행 분석
-## 신살(神殺) 특징 (제공된 신살 목록을 바탕으로 각각이 이 사람에게 어떤 의미인지 짧게 풀어서 설명. 목록이 비어 있다면 "특별히 두드러지는 신살은 없어요" 정도로 자연스럽게 한 문장만 언급하고 넘어가기)
+## 신살(神殺) 특징 (제공된 신살·십이신살 목록을 바탕으로 각각이 이 사람에게 어떤 의미인지 짧게 풀어서 설명. 지장간·십이운성·납음 정보도 자연스럽게 참고해서 사주를 더 입체적으로 설명하되, 전부 억지로 나열하지는 말고 이 사람에게 의미 있는 부분 위주로. 신살이 아예 없다면 "특별히 두드러지는 신살은 없어요" 정도로 자연스럽게 한 문장만 언급하고 넘어가기)
 ## 타고난 성격과 기질
 ## 강점
 ## 유의할 점
 ## 종합 조언 (2~3문장)`;
 
-  const user = `다음 사람의 사주를 해석해주세요.\n\n${describePerson(person)}\n\n${formatBaziForPrompt(bazi)}\n\n${formatShinsalForPrompt(shinsal)}`;
+  const user = `다음 사람의 사주를 해석해주세요.\n\n${describePerson(person)}\n\n${formatBaziForPrompt(bazi)}\n\n${formatShinsalForPrompt(shinsal)}\n\n${formatDetailTableForPrompt(bazi, { hiddenStems, stages, nayin, twelveShinsal })}`;
   return { system, user };
 }
 
