@@ -90,10 +90,12 @@ function renderDetailTable(bazi, { hiddenStems, stages, nayin, twelveShinsal }) 
     if (!row) return "-";
     return row.stems
       .map((s) => {
-        const title = `${s.gan}(${s.ganHanja}) · ${s.tenGod}`;
-        return getSajuInfo(s.tenGod)
-          ? `<span class="detail-cell-clickable" data-shinsal="${s.tenGod}" data-title="${title}">${s.gan}<span class="detail-sub">${s.days}</span></span>`
-          : `${s.gan}<span class="detail-sub">${s.days}</span>`;
+        const ganTitle = `${s.gan}(${s.ganHanja}) · ${s.tenGod}`;
+        const ganHtml = getSajuInfo(s.tenGod)
+          ? `<span class="detail-cell-clickable" data-shinsal="${s.tenGod}" data-title="${ganTitle}">${s.gan}</span>`
+          : s.gan;
+        const daysHtml = `<span class="detail-sub detail-cell-clickable" data-shinsal="일수" data-title="지장간의 일수">${s.days}</span>`;
+        return `${ganHtml}${daysHtml}`;
       })
       .join("<br/>");
   };
