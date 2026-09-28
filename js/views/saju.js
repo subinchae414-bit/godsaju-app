@@ -88,7 +88,14 @@ function renderDetailTable(bazi, { hiddenStems, stages, nayin, twelveShinsal }) 
   const hiddenCell = (key) => {
     const row = hiddenStems.ok ? hiddenStems.rows.find((r) => r.key === key) : null;
     if (!row) return "-";
-    return row.stems.map((s) => `${s.gan}<span class="detail-sub">${s.days}</span>`).join("<br/>");
+    return row.stems
+      .map((s) => {
+        const title = `${s.gan}(${s.ganHanja}) · ${s.tenGod}`;
+        return getSajuInfo(s.tenGod)
+          ? `<span class="detail-cell-clickable" data-shinsal="${s.tenGod}" data-title="${title}">${s.gan}<span class="detail-sub">${s.days}</span></span>`
+          : `${s.gan}<span class="detail-sub">${s.days}</span>`;
+      })
+      .join("<br/>");
   };
   const stageCell = (key) => (stages.ok && stages.rows.find((r) => r.key === key)?.stage) || "-";
   const twelveCell = (key) => (twelveShinsal.ok && twelveShinsal.rows.find((r) => r.key === key)?.term) || "-";
@@ -216,10 +223,11 @@ export async function renderSaju(container, params) {
 
   function showPopoverFor(trigger) {
     const label = trigger.dataset.shinsal;
+    const title = trigger.dataset.title || label;
     const desc = getSajuInfo(label);
     if (!desc) return;
 
-    popoverEl.innerHTML = `<div class="shinsal-popover-title">${label}</div><div class="shinsal-popover-body">${desc}</div>`;
+    popoverEl.innerHTML = `<div class="shinsal-popover-title">${title}</div><div class="shinsal-popover-body">${desc}</div>`;
     popoverEl.classList.remove("above");
     popoverEl.classList.add("show");
 
