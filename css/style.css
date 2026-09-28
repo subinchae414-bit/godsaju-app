@@ -764,6 +764,89 @@ button {
   margin-left: 1px;
 }
 
+.detail-cell-clickable {
+  cursor: pointer;
+  font-weight: 700;
+  color: #6a3fa0;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+}
+
+.shinsal-chip {
+  cursor: pointer;
+}
+
+/* ---------- 신살 설명 말풍선 ---------- */
+
+.shinsal-popover {
+  position: fixed;
+  z-index: 80;
+  width: max-content;
+  max-width: 240px;
+  background: #fff;
+  color: var(--text);
+  border: 2px solid var(--text);
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.shinsal-popover.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.shinsal-popover::before,
+.shinsal-popover::after {
+  content: "";
+  position: absolute;
+  left: var(--arrow-left, 20px);
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+}
+
+.shinsal-popover::before {
+  top: -8px;
+  border-bottom: 8px solid var(--text);
+}
+
+.shinsal-popover::after {
+  top: -5px;
+  margin-left: 1px;
+  border-bottom: 7px solid #fff;
+}
+
+.shinsal-popover.above::before,
+.shinsal-popover.above::after {
+  top: auto;
+  border-bottom: none;
+}
+
+.shinsal-popover.above::before {
+  bottom: -8px;
+  border-top: 8px solid var(--text);
+}
+
+.shinsal-popover.above::after {
+  bottom: -5px;
+  border-top: 7px solid #fff;
+}
+
+.shinsal-popover-title {
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
 .wx-row {
   display: flex;
   flex-wrap: wrap;
