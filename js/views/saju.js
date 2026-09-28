@@ -132,7 +132,6 @@ function renderDetailTable(bazi, { hiddenStems, stages, nayin, twelveShinsal }) 
         ${row("납음", nayinCell, { clickableCells: true })}
       </div>
       <div class="hint" style="margin-top:8px;">지장간·12운성·납음은 각 기둥 기준, 12신살은 연지(年支) 기준으로 계산돼요. 보라색 글자를 누르면 설명이 나와요.</div>
-      <div class="hint" style="margin-top:4px;">지장간 글자 옆 작은 숫자: ${getSajuInfo("일수")}</div>
     </div>`;
 }
 
