@@ -735,6 +735,8 @@ button {
 .wx-금 { border-color: var(--pastel-yellow-deep); background: var(--pastel-yellow); color: #9a7a0a; }
 .wx-수 { border-color: var(--pastel-blue-deep); background: var(--pastel-blue); color: #2f6a9a; }
 
+.shinsal-chip { border-color: var(--pastel-purple-deep); background: var(--pastel-purple); color: #6a3fa0; }
+
 /* ---------- Compat score heart ---------- */
 
 .score-section {

@@ -2,7 +2,7 @@ import { getPerson, getCachedReading, setCachedReading } from "../storage.js";
 import { streamMessage, ClaudeApiError } from "../claude.js";
 import { buildPersonalPrompt } from "../prompts.js";
 import { renderMarkdown } from "../markdown.js";
-import { computeBazi } from "../sajuCalc.js";
+import { computeBazi, computeShinsal } from "../sajuCalc.js";
 import { getSpaceId } from "../space.js";
 import { FORTUNE_RANGES } from "../prompts.js";
 import { confirmSpend, cancelledSpendHtml } from "../credits.js";
@@ -68,6 +68,20 @@ function renderBaziCard(bazi) {
     </div>`;
 }
 
+function renderShinsalCard(shinsal) {
+  if (!shinsal.ok) return "";
+  const chips =
+    shinsal.items.length > 0
+      ? shinsal.items.map((it) => `<span class="wx-chip shinsal-chip">${it.label}</span>`).join("")
+      : `<span class="hint" style="margin:0;">특별히 두드러지는 신살은 없어요.</span>`;
+
+  return `
+    <div class="card bazi-card" style="margin-top:10px;">
+      <div class="section-title" style="margin:0 0 10px;">신살(神殺) 🐾</div>
+      <div class="wx-row" style="margin-top:0;">${chips}</div>
+    </div>`;
+}
+
 export async function renderSaju(container, params) {
   container.innerHTML = `<div class="page"><div class="loading-row"><div class="spinner"></div> 불러오는 중...</div></div>`;
 
@@ -86,6 +100,7 @@ export async function renderSaju(container, params) {
 
   const cacheKey = `saju:${person.id}`;
   const bazi = computeBazi(person);
+  const shinsal = computeShinsal(bazi);
 
   container.innerHTML = `
     <div class="page">
@@ -105,6 +120,7 @@ export async function renderSaju(container, params) {
       </div>
 
       ${renderBaziCard(bazi)}
+      ${renderShinsalCard(shinsal)}
 
       <div class="section-title" style="margin:16px 2px 8px;">기간별 운세 보기 🐾</div>
       <div class="pill-group" style="margin-bottom:4px;">
