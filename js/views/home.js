@@ -62,33 +62,37 @@ export async function renderHome(container) {
 
   const heroHtml = isDogTheme
     ? `
-      <div class="hero-banner">
-        <img class="hero-bg-photo" src="./img/dogs/main.jpg" alt="사주풀이 마스코트 강아지" />
-        <div class="speech-bubble hero-speech">
-          <div>어서와멍! 🐾</div>
-          <div>키캡을 눌러봐라멍!</div>
+      <div class="dog-hero-card">
+        <img class="dog-hero-avatar" src="./img/dogs/main.jpg" alt="사주풀이 마스코트 강아지" />
+        <div class="dog-hero-text">
+          <div class="dog-hero-title">오늘도 왔구나 멍! 🐾</div>
+          <div class="dog-hero-sub">우리 댕댕이가 봐주는 사주, 한번 볼까?</div>
         </div>
       </div>`
     : "";
 
   const keycapGridHtml = isDogTheme
     ? `
-      <div class="keycap-grid">
-        <a class="keycap keycap-sky" href="${sajuHref}" data-menu="saju">
-          <span class="keycap-fruit">💗⭐</span>
-          <span class="keycap-caption"><span class="keycap-caption-icon">★</span><span class="keycap-label">사주보기</span></span>
+      <div class="dog-menu-grid">
+        <a class="dog-menu-card dog-menu-yellow" href="${sajuHref}" data-menu="saju">
+          <img class="dog-menu-photo" src="./img/dogs/saju.jpg" alt="사주보기" />
+          <div class="dog-menu-title">사주 보기 🐾</div>
+          <div class="dog-menu-sub">용하다고 소문난 댕댕이 사주</div>
         </a>
-        <a class="keycap keycap-pink" href="#/compat" data-menu="compat">
-          <span class="keycap-fruit">🍒💗</span>
-          <span class="keycap-caption"><span class="keycap-caption-icon">♡</span><span class="keycap-label">궁합보기</span></span>
+        <a class="dog-menu-card dog-menu-green" href="#/compat" data-menu="compat">
+          <img class="dog-menu-photo" src="./img/dogs/compat.jpg" alt="궁합보기" />
+          <div class="dog-menu-title">궁합 보기 🐾</div>
+          <div class="dog-menu-sub">우리 사이는 몇 점?</div>
         </a>
-        <a class="keycap keycap-yellow" href="${todayHref}" data-menu="today">
-          <span class="keycap-fruit">🍉🍋</span>
-          <span class="keycap-caption"><span class="keycap-caption-icon">☀</span><span class="keycap-label">오늘의 운세</span></span>
+        <a class="dog-menu-card dog-menu-blue" href="${daewoonHref}" data-menu="daewoon">
+          <img class="dog-menu-photo" src="./img/dogs/daewoon.jpg" alt="대운보기" />
+          <div class="dog-menu-title">대운 보기 🐾</div>
+          <div class="dog-menu-sub">물 들어올 때 노 젓자</div>
         </a>
-        <a class="keycap keycap-lavender" href="${daewoonHref}" data-menu="daewoon">
-          <span class="keycap-fruit">☁️⭐</span>
-          <span class="keycap-caption"><span class="keycap-caption-icon">∞</span><span class="keycap-label">대운</span></span>
+        <a class="dog-menu-card dog-menu-purple" href="${todayHref}" data-menu="today">
+          <img class="dog-menu-photo" src="./img/dogs/today.jpg" alt="오늘의 운세" />
+          <div class="dog-menu-title">오늘의 운세 🐾</div>
+          <div class="dog-menu-sub">오늘 하루는 어떨까?</div>
         </a>
       </div>`
     : `
@@ -122,7 +126,7 @@ export async function renderHome(container) {
     location.hash = "#/person/new";
   });
 
-  container.querySelectorAll(".keycap").forEach((keycap) => {
+  container.querySelectorAll(".keycap, .dog-menu-card").forEach((keycap) => {
     keycap.addEventListener("click", () => playKeycapClick());
   });
 }
