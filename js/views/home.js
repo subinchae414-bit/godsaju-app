@@ -75,24 +75,24 @@ export async function renderHome(container) {
       </div>
 
       <div class="keycap-grid">
-        <a class="keycap keycap-green" href="${sajuHref}" data-menu="saju">
-          <span class="keycap-photo"><img src="./img/dogs/saju.jpg" alt="사주보기" /></span>
+        <a class="keycap keycap-mint" href="${sajuHref}" data-menu="saju">
+          <span class="keycap-fruit">🍒</span>
           <span class="keycap-label">사주보기</span>
         </a>
-        <a class="keycap keycap-ivory" href="#/compat" data-menu="compat">
-          <span class="keycap-photo"><img src="./img/dogs/compat.jpg" alt="궁합보기" /></span>
+        <a class="keycap keycap-pink" href="#/compat" data-menu="compat">
+          <span class="keycap-fruit">🍓</span>
           <span class="keycap-label">궁합보기</span>
         </a>
-        <a class="keycap keycap-green" href="${todayHref}" data-menu="today">
-          <span class="keycap-photo"><img src="./img/dogs/today.jpg" alt="오늘운세" /></span>
+        <a class="keycap keycap-yellow" href="${todayHref}" data-menu="today">
+          <span class="keycap-fruit">🍋</span>
           <span class="keycap-label">오늘운세</span>
         </a>
-        <a class="keycap keycap-ivory" href="${tomorrowHref}" data-menu="tomorrow">
-          <span class="keycap-photo"><img src="./img/dogs/encourage.jpg" alt="내일운세" /></span>
+        <a class="keycap keycap-lavender" href="${tomorrowHref}" data-menu="tomorrow">
+          <span class="keycap-fruit">🍇</span>
           <span class="keycap-label">내일운세</span>
         </a>
-        <a class="keycap keycap-green" href="${daewoonHref}" data-menu="daewoon">
-          <span class="keycap-photo"><img src="./img/dogs/daewoon.jpg" alt="대운보기" /></span>
+        <a class="keycap keycap-sky" href="${daewoonHref}" data-menu="daewoon">
+          <span class="keycap-fruit">🍉</span>
           <span class="keycap-label">대운보기</span>
         </a>
       </div>

@@ -1,5 +1,5 @@
 :root {
-  --bg: #fff8ec;
+  --bg: #e3f4ff;
   --bg-elevated: #ffffff;
   --bg-card: #ffffff;
   --border: #ffe3ba;
@@ -27,10 +27,11 @@
   --pastel-pink: #ffe0ec;
   --pastel-pink-deep: #ff9ebb;
 
-  --keycap-green: #b7c79f;
-  --keycap-green-deep: #8fa374;
-  --keycap-ivory: #f2ead2;
-  --keycap-ivory-deep: #ddcfa0;
+  --keycap-mint: 175, 225, 205;
+  --keycap-pink: 255, 200, 212;
+  --keycap-yellow: 255, 224, 140;
+  --keycap-lavender: 205, 195, 245;
+  --keycap-sky: 165, 205, 250;
 
   --font: "Jua", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", sans-serif;
 }
@@ -50,9 +51,9 @@ html, body {
 
 body {
   background-image:
-    radial-gradient(circle at 10% 0%, rgba(255, 213, 79, 0.28), transparent 40%),
-    radial-gradient(circle at 90% 8%, rgba(255, 158, 187, 0.22), transparent 38%),
-    radial-gradient(circle at 20% 95%, rgba(154, 201, 245, 0.20), transparent 42%);
+    radial-gradient(circle at 10% 0%, rgba(255, 255, 255, 0.65), transparent 42%),
+    radial-gradient(circle at 90% 8%, rgba(179, 229, 255, 0.45), transparent 40%),
+    radial-gradient(circle at 20% 95%, rgba(190, 245, 225, 0.32), transparent 45%);
   background-attachment: fixed;
 }
 
@@ -166,63 +167,51 @@ button {
   gap: 4px;
   width: 100%;
   aspect-ratio: 1 / 0.72;
-  border-radius: 18px;
-  border: none;
+  border-radius: 26px;
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
   text-align: center;
   font: inherit;
   color: var(--text);
   appearance: none;
   -webkit-appearance: none;
   cursor: pointer;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
 .keycap::before {
   content: "";
   position: absolute;
-  inset: 6px 6px auto 6px;
-  height: 34%;
-  border-radius: 40% 40% 60% 60% / 60% 60% 100% 100%;
-  background: rgba(255, 255, 255, 0.22);
+  top: -10%;
+  left: 8%;
+  width: 55%;
+  height: 45%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  filter: blur(3px);
   pointer-events: none;
 }
 
-.keycap-green {
-  background: var(--keycap-green);
-  box-shadow: 0 5px 0 var(--keycap-green-deep), 0 8px 14px rgba(90, 110, 70, 0.18);
-}
-
-.keycap-ivory {
-  background: var(--keycap-ivory);
-  box-shadow: 0 5px 0 var(--keycap-ivory-deep), 0 8px 14px rgba(150, 130, 80, 0.16);
-}
+.keycap-mint     { background: linear-gradient(160deg, rgba(var(--keycap-mint), 0.55), rgba(255, 255, 255, 0.25)); box-shadow: 0 6px 16px rgba(120, 180, 150, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.6); }
+.keycap-pink     { background: linear-gradient(160deg, rgba(var(--keycap-pink), 0.55), rgba(255, 255, 255, 0.25)); box-shadow: 0 6px 16px rgba(220, 140, 160, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.6); }
+.keycap-yellow   { background: linear-gradient(160deg, rgba(var(--keycap-yellow), 0.55), rgba(255, 255, 255, 0.25)); box-shadow: 0 6px 16px rgba(210, 180, 100, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.6); }
+.keycap-lavender { background: linear-gradient(160deg, rgba(var(--keycap-lavender), 0.55), rgba(255, 255, 255, 0.25)); box-shadow: 0 6px 16px rgba(160, 150, 210, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.6); }
+.keycap-sky      { background: linear-gradient(160deg, rgba(var(--keycap-sky), 0.55), rgba(255, 255, 255, 0.25)); box-shadow: 0 6px 16px rgba(110, 160, 220, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.6); }
 
 .keycap:active {
-  transform: translateY(4px);
+  transform: translateY(2px) scale(0.98);
 }
 
-.keycap-green:active { box-shadow: 0 1px 0 var(--keycap-green-deep); }
-.keycap-ivory:active { box-shadow: 0 1px 0 var(--keycap-ivory-deep); }
-
-.keycap-photo {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.75);
-  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.12);
-  flex-shrink: 0;
-}
-
-.keycap-photo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+.keycap-fruit {
+  font-size: 32px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.12));
 }
 
 .keycap-label {
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 700;
   letter-spacing: -0.2px;
 }
