@@ -74,21 +74,17 @@ export async function renderHome(container) {
       </div>
 
       <div class="keycap-grid">
-        <a class="keycap keycap-sky" href="${sajuHref}" data-menu="saju">
-          <span class="keycap-fruit">💗⭐</span>
-          <span class="keycap-caption"><span class="keycap-caption-icon">★</span><span class="keycap-label">사주보기</span></span>
+        <a class="keycap keycap-img" href="${sajuHref}" data-menu="saju">
+          <img src="./img/keycaps/saju.webp" alt="사주보기" />
         </a>
-        <a class="keycap keycap-pink" href="#/compat" data-menu="compat">
-          <span class="keycap-fruit">🍒💗</span>
-          <span class="keycap-caption"><span class="keycap-caption-icon">♡</span><span class="keycap-label">궁합보기</span></span>
+        <a class="keycap keycap-img" href="#/compat" data-menu="compat">
+          <img src="./img/keycaps/gunghap.webp" alt="궁합보기" />
         </a>
-        <a class="keycap keycap-yellow" href="${todayHref}" data-menu="today">
-          <span class="keycap-fruit">🍉🍋</span>
-          <span class="keycap-caption"><span class="keycap-caption-icon">☀</span><span class="keycap-label">오늘의 운세</span></span>
+        <a class="keycap keycap-img" href="${todayHref}" data-menu="today">
+          <img src="./img/keycaps/today.webp" alt="오늘의 운세" />
         </a>
-        <a class="keycap keycap-lavender" href="${daewoonHref}" data-menu="daewoon">
-          <span class="keycap-fruit">☁️⭐</span>
-          <span class="keycap-caption"><span class="keycap-caption-icon">∞</span><span class="keycap-label">대운</span></span>
+        <a class="keycap keycap-img" href="${daewoonHref}" data-menu="daewoon">
+          <img src="./img/keycaps/daewoon.webp" alt="대운" />
         </a>
       </div>
 
