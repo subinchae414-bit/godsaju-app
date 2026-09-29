@@ -1,16 +1,6 @@
 import { getPeople, RELATIONS } from "../storage.js";
 import { playKeycapClick } from "../clickSound.js";
-
-const RELATION_ICON = {
-  본인: "🧑",
-  가족: "👨‍👩‍👧",
-  연인: "💕",
-  친구: "🤝",
-};
-
-function initial(name) {
-  return name?.trim()?.[0] || "?";
-}
+import { RELATION_ICON, initial } from "../personDisplay.js";
 
 export async function renderHome(container) {
   container.innerHTML = `<div class="page"><div class="loading-row"><div class="spinner"></div> 불러오는 중...</div></div>`;
@@ -58,10 +48,14 @@ export async function renderHome(container) {
           )
           .join("");
 
-  const personHref = (suffix) => (people.length > 0 ? `#/person/${people[0].id}${suffix}` : "#/person/new");
-  const sajuHref = personHref("/saju");
-  const daewoonHref = personHref("/daewoon/early");
-  const todayHref = personHref("/fortune/today");
+  const personHref = (target, suffix) => {
+    if (people.length === 0) return "#/person/new";
+    if (people.length === 1) return `#/person/${people[0].id}${suffix}`;
+    return `#/pick/${target}`;
+  };
+  const sajuHref = personHref("saju", "/saju");
+  const daewoonHref = personHref("daewoon", "/daewoon/early");
+  const todayHref = personHref("today", "/fortune/today");
 
   container.innerHTML = `
     <div class="page">
