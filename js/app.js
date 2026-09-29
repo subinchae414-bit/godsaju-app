@@ -8,8 +8,10 @@ import { renderLock } from "./views/lock.js";
 import { renderShare } from "./views/share.js";
 import { renderFortune } from "./views/fortune.js";
 import { renderDaewoon } from "./views/daewoon.js";
+import { renderThemePicker } from "./views/themePicker.js";
 import { getCredits } from "./storage.js";
 import { getSpaceId } from "./space.js";
+import { getTheme } from "./theme.js";
 
 const appEl = document.getElementById("app");
 
@@ -95,6 +97,16 @@ async function route() {
     renderLock(lockHost, () => route());
     return;
   }
+
+  if (!getTheme()) {
+    appEl.innerHTML = "";
+    const themeHost = document.createElement("div");
+    appEl.appendChild(themeHost);
+    renderThemePicker(themeHost, () => route());
+    return;
+  }
+
+  document.body.dataset.theme = getTheme();
 
   const [first, second, third, fourth] = segments;
 

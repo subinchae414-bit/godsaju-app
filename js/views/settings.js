@@ -1,6 +1,9 @@
 import { getCredits } from "../storage.js";
 import { setSpaceId } from "../space.js";
 import { isSupabaseConfigured } from "../supabaseClient.js";
+import { getTheme, setTheme } from "../theme.js";
+
+const THEME_LABEL = { dog: "🐶 강아지 테마", fruit: "🍉 과일 테마" };
 
 export function renderSettings(container) {
   const configured = isSupabaseConfigured();
@@ -17,6 +20,14 @@ export function renderSettings(container) {
         </div>
         <button class="btn btn-primary" id="s-charge" disabled>충전하기 (준비 중)</button>
         <div class="hint" style="margin-top:8px;">결제 기능은 곧 열릴 예정이에요. 그 전까지 문의해주세요.</div>
+      </div>
+
+      <div class="section-title">테마</div>
+      <div class="card" style="margin-bottom:4px;">
+        <div style="font-size:13px;color:var(--text-dim);line-height:1.7;margin-bottom:12px;">
+          지금은 <strong>${THEME_LABEL[getTheme()] || "테마 미선택"}</strong>로 보고 있어요.
+        </div>
+        <button class="btn btn-ghost" id="s-theme">테마 바꾸기</button>
       </div>
 
       <div class="section-title">공유 공간 (PIN)</div>
@@ -52,6 +63,12 @@ export function renderSettings(container) {
       creditsEl.style.color = "var(--danger)";
       creditsEl.style.fontSize = "13px";
     });
+
+  container.querySelector("#s-theme").addEventListener("click", () => {
+    setTheme("");
+    location.hash = "#/";
+    location.reload();
+  });
 
   container.querySelector("#s-leave").addEventListener("click", () => {
     if (confirm("현재 공간에서 나갈까요? 다시 들어오려면 PIN을 입력해야 해요. (데이터는 그대로 남아있어요)")) {

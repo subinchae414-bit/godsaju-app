@@ -1,6 +1,7 @@
 import { getPeople, RELATIONS } from "../storage.js";
 import { playKeycapClick } from "../clickSound.js";
 import { RELATION_ICON, initial } from "../personDisplay.js";
+import { getTheme } from "../theme.js";
 
 export async function renderHome(container) {
   container.innerHTML = `<div class="page"><div class="loading-row"><div class="spinner"></div> 불러오는 중...</div></div>`;
@@ -57,8 +58,40 @@ export async function renderHome(container) {
   const daewoonHref = personHref("daewoon", "/daewoon/early");
   const todayHref = personHref("today", "/fortune/today");
 
-  container.innerHTML = `
-    <div class="page">
+  const isDogTheme = getTheme() === "dog";
+
+  const heroHtml = isDogTheme
+    ? `
+      <div class="hero-banner">
+        <img class="hero-bg-photo" src="./img/dogs/main.jpg" alt="사주풀이 마스코트 강아지" />
+        <div class="speech-bubble hero-speech">
+          <div>어서와멍! 🐾</div>
+          <div>키캡을 눌러봐라멍!</div>
+        </div>
+      </div>`
+    : "";
+
+  const keycapGridHtml = isDogTheme
+    ? `
+      <div class="keycap-grid">
+        <a class="keycap keycap-sky" href="${sajuHref}" data-menu="saju">
+          <span class="keycap-fruit">💗⭐</span>
+          <span class="keycap-caption"><span class="keycap-caption-icon">★</span><span class="keycap-label">사주보기</span></span>
+        </a>
+        <a class="keycap keycap-pink" href="#/compat" data-menu="compat">
+          <span class="keycap-fruit">🍒💗</span>
+          <span class="keycap-caption"><span class="keycap-caption-icon">♡</span><span class="keycap-label">궁합보기</span></span>
+        </a>
+        <a class="keycap keycap-yellow" href="${todayHref}" data-menu="today">
+          <span class="keycap-fruit">🍉🍋</span>
+          <span class="keycap-caption"><span class="keycap-caption-icon">☀</span><span class="keycap-label">오늘의 운세</span></span>
+        </a>
+        <a class="keycap keycap-lavender" href="${daewoonHref}" data-menu="daewoon">
+          <span class="keycap-fruit">☁️⭐</span>
+          <span class="keycap-caption"><span class="keycap-caption-icon">∞</span><span class="keycap-label">대운</span></span>
+        </a>
+      </div>`
+    : `
       <div class="keycap-grid">
         <a class="keycap keycap-img" href="${sajuHref}" data-menu="saju">
           <img src="./img/keycaps/saju.webp" alt="사주보기" />
@@ -72,7 +105,12 @@ export async function renderHome(container) {
         <a class="keycap keycap-img" href="${daewoonHref}" data-menu="daewoon">
           <img src="./img/keycaps/daewoon.webp" alt="대운" />
         </a>
-      </div>
+      </div>`;
+
+  container.innerHTML = `
+    <div class="page">
+      ${heroHtml}
+      ${keycapGridHtml}
 
       <div class="section-title" style="margin-top:18px;">우리 아이들</div>
       ${listHtml}
