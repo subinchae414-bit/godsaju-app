@@ -105,7 +105,7 @@ export async function renderHome(container) {
           <img src="./img/keycaps/gunghap.webp" alt="궁합보기" />
         </a>
         <a class="keycap keycap-img" href="${saeunHref}" data-menu="saeun">
-          <img src="./img/keycaps/today.webp" alt="연운" />
+          <img src="./img/keycaps/saeun.webp" alt="연운" />
         </a>
         <a class="keycap keycap-img" href="${daewoonHref}" data-menu="daewoon">
           <img src="./img/keycaps/daewoon.webp" alt="대운" />
