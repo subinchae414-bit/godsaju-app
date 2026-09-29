@@ -65,39 +65,34 @@ export async function renderHome(container) {
 
   container.innerHTML = `
     <div class="page">
-      <div class="hero-card">
-        <div class="hero-photo"><img src="./img/dogs/main.jpg" alt="사주풀이 마스코트 강아지" /></div>
-        <div class="hero-text">
-          <div class="hero-title">오늘도 왔구나 멍! 🐾</div>
-          <div class="hero-desc">우리 댕댕이가 봐주는 사주, 한번 볼까?</div>
+      <div class="hero-banner">
+        <img class="hero-bg-photo" src="./img/dogs/main.jpg" alt="사주풀이 마스코트 강아지" />
+        <div class="speech-bubble hero-speech">
+          <div>어서와멍! 🐾</div>
+          <div>키캡을 눌러봐라멍!</div>
         </div>
       </div>
 
-      <div class="menu-grid">
-        <a class="menu-card menu-yellow" href="${sajuHref}" data-menu="saju">
-          <div class="menu-photo blob-a"><img src="./img/dogs/saju.jpg" alt="사주 보기" /></div>
-          <div class="menu-title">사주 보기 <span class="menu-badge">🐾</span></div>
-          <div class="menu-desc">용하다고 소문난 댕댕이 사주</div>
+      <div class="keycap-grid">
+        <a class="keycap keycap-green" href="${sajuHref}" data-menu="saju">
+          <span class="keycap-icon">🔮</span>
+          <span class="keycap-label">사주보기</span>
         </a>
-        <a class="menu-card menu-green" href="#/compat" data-menu="compat">
-          <div class="menu-photo blob-b"><img src="./img/dogs/compat.jpg" alt="궁합 보기" /></div>
-          <div class="menu-title">궁합 보기 <span class="menu-badge">🐾</span></div>
-          <div class="menu-desc">우리 사이는 몇 점?</div>
+        <a class="keycap keycap-ivory" href="#/compat" data-menu="compat">
+          <span class="keycap-icon">💕</span>
+          <span class="keycap-label">궁합보기</span>
         </a>
-        <a class="menu-card menu-purple" href="${todayHref}" data-menu="today">
-          <div class="menu-photo blob-c"><img src="./img/dogs/today.jpg" alt="오늘 운세" /></div>
-          <div class="menu-title">오늘 운세 <span class="menu-badge">🐾</span></div>
-          <div class="menu-desc">오늘 하루는 어떨까?</div>
+        <a class="keycap keycap-green" href="${todayHref}" data-menu="today">
+          <span class="keycap-icon">☀️</span>
+          <span class="keycap-label">오늘운세</span>
         </a>
-        <a class="menu-card menu-peach" href="${tomorrowHref}" data-menu="tomorrow">
-          <div class="menu-photo blob-d"><img src="./img/dogs/encourage.jpg" alt="내일 운세" /></div>
-          <div class="menu-title">내일 운세 <span class="menu-badge">🐾</span></div>
-          <div class="menu-desc">내일은 또 어떤 하루?</div>
+        <a class="keycap keycap-ivory" href="${tomorrowHref}" data-menu="tomorrow">
+          <span class="keycap-icon">🌙</span>
+          <span class="keycap-label">내일운세</span>
         </a>
-        <a class="menu-card menu-blue" href="${daewoonHref}" data-menu="daewoon">
-          <div class="menu-photo blob-a"><img src="./img/dogs/daewoon.jpg" alt="대운 보기" /></div>
-          <div class="menu-title">대운 보기 <span class="menu-badge">🐾</span></div>
-          <div class="menu-desc">물 들어올 때 노 젓자</div>
+        <a class="keycap keycap-green" href="${daewoonHref}" data-menu="daewoon">
+          <span class="keycap-icon">🌊</span>
+          <span class="keycap-label">대운보기</span>
         </a>
       </div>
 
