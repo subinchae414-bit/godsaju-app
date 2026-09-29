@@ -55,8 +55,9 @@ export async function renderHome(container) {
     return `#/pick/${target}`;
   };
   const sajuHref = personHref("saju", "/saju");
+  const saeunHref = personHref("saeun", "/saeun/current");
   const daewoonHref = personHref("daewoon", "/daewoon/early");
-  const todayHref = personHref("today", "/fortune/today");
+  const redThreadHref = personHref("redthread", "/redthread");
 
   const isDogTheme = getTheme() === "dog";
 
@@ -84,15 +85,15 @@ export async function renderHome(container) {
           <div class="dog-menu-title">궁합 보기 🐾</div>
           <div class="dog-menu-sub">우리 사이는 몇 점?</div>
         </a>
-        <a class="dog-menu-card dog-menu-blue" href="${daewoonHref}" data-menu="daewoon">
+        <a class="dog-menu-card dog-menu-blue" href="${saeunHref}" data-menu="saeun">
+          <img class="dog-menu-photo" src="./img/dogs/encourage.jpg" alt="세운보기" />
+          <div class="dog-menu-title">세운(연운) 🐾</div>
+          <div class="dog-menu-sub">올해는 어떤 기운이 흐를까?</div>
+        </a>
+        <a class="dog-menu-card dog-menu-purple" href="${daewoonHref}" data-menu="daewoon">
           <img class="dog-menu-photo" src="./img/dogs/daewoon.jpg" alt="대운보기" />
           <div class="dog-menu-title">대운 보기 🐾</div>
           <div class="dog-menu-sub">물 들어올 때 노 젓자</div>
-        </a>
-        <a class="dog-menu-card dog-menu-purple" href="${todayHref}" data-menu="today">
-          <img class="dog-menu-photo" src="./img/dogs/today.jpg" alt="오늘의 운세" />
-          <div class="dog-menu-title">오늘의 운세 🐾</div>
-          <div class="dog-menu-sub">오늘 하루는 어떨까?</div>
         </a>
       </div>`
     : `
@@ -103,18 +104,30 @@ export async function renderHome(container) {
         <a class="keycap keycap-img" href="#/compat" data-menu="compat">
           <img src="./img/keycaps/gunghap.webp" alt="궁합보기" />
         </a>
-        <a class="keycap keycap-img" href="${todayHref}" data-menu="today">
-          <img src="./img/keycaps/today.webp" alt="오늘의 운세" />
+        <a class="keycap keycap-plain" href="${saeunHref}" data-menu="saeun">
+          <span class="keycap-plain-emoji">🍇⭐</span>
+          <span class="keycap-plain-label">세운(연운)</span>
         </a>
         <a class="keycap keycap-img" href="${daewoonHref}" data-menu="daewoon">
           <img src="./img/keycaps/daewoon.webp" alt="대운" />
         </a>
       </div>`;
 
+  const redThreadHtml = `
+    <a class="redthread-banner" href="${redThreadHref}" data-menu="redthread">
+      <span class="redthread-icon">🧵</span>
+      <span class="redthread-text">
+        <span class="redthread-title">붉은 실 만들기</span>
+        <span class="redthread-sub">나와 잘 맞는 인연 TOP 10 찾기</span>
+      </span>
+      <span class="chevron">›</span>
+    </a>`;
+
   container.innerHTML = `
     <div class="page">
       ${heroHtml}
       ${keycapGridHtml}
+      ${redThreadHtml}
 
       <div class="section-title" style="margin-top:18px;">우리 아이들</div>
       ${listHtml}
@@ -126,7 +139,7 @@ export async function renderHome(container) {
     location.hash = "#/person/new";
   });
 
-  container.querySelectorAll(".keycap, .dog-menu-card").forEach((keycap) => {
+  container.querySelectorAll(".keycap, .dog-menu-card, .redthread-banner").forEach((keycap) => {
     keycap.addEventListener("click", () => playKeycapClick());
   });
 }

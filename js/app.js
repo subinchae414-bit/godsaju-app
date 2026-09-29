@@ -7,7 +7,9 @@ import { renderSettings } from "./views/settings.js";
 import { renderLock } from "./views/lock.js";
 import { renderShare } from "./views/share.js";
 import { renderFortune } from "./views/fortune.js";
+import { renderSaeun } from "./views/saeun.js";
 import { renderDaewoon } from "./views/daewoon.js";
+import { renderRedThread } from "./views/redThread.js";
 import { renderThemePicker } from "./views/themePicker.js";
 import { getCredits } from "./storage.js";
 import { getSpaceId } from "./space.js";
@@ -134,8 +136,12 @@ async function route() {
     await renderSaju(contentHost, { id: second });
   } else if (first === "person" && second && third === "fortune") {
     await renderFortune(contentHost, { id: second, range: fourth });
+  } else if (first === "person" && second && third === "saeun") {
+    await renderSaeun(contentHost, { id: second, range: fourth });
   } else if (first === "person" && second && third === "daewoon") {
     await renderDaewoon(contentHost, { id: second, phase: fourth });
+  } else if (first === "person" && second && third === "redthread") {
+    await renderRedThread(contentHost, { id: second });
   } else if (first === "pick") {
     await renderPickPerson(contentHost, { target: second });
   } else if (first === "compat") {

@@ -296,6 +296,45 @@ export function computeDaewoon(person, cycleCount = 8) {
   return { ok: true, forward, startAge: cycles[0]?.startAge ?? null, cycles };
 }
 
+// 세운(歲運): 특정 연도 한 해 전체의 흐름을 나타내는 연간(年干) 간지가 일간과 어떤 관계인지.
+// year는 양력 연도(예: 2026). 연초(1~2월)는 입춘 전후로 연주가 전년도로 계산될 수 있어, 그 해
+// 7월 1일을 기준 삼아 절기 경계 문제를 피한다 — 이는 사주 원국의 연주를 구하는 방식과 동일한 원리다.
+export function computeSaeun(bazi, year) {
+  if (typeof window === "undefined" || !window.Solar) {
+    return { ok: false, error: "사주 계산 라이브러리를 불러오지 못했어요. 인터넷 연결을 확인해주세요." };
+  }
+  if (!bazi.ok) {
+    return { ok: false, error: bazi.error };
+  }
+
+  let pillar;
+  try {
+    const solar = window.Solar.fromYmdHms(year, 7, 1, 12, 0, 0);
+    const lunar = solar.getLunar();
+    pillar = pillarInfo(lunar.getYearGanIndexExact(), lunar.getYearZhiIndexExact());
+  } catch (err) {
+    return { ok: false, error: "세운을 계산하지 못했어요." };
+  }
+
+  return {
+    ok: true,
+    year,
+    pillar,
+    tenGod: tenGod(bazi.pillars.day.ganIndex, pillar.ganIndex),
+  };
+}
+
+// Claude 프롬프트에 그대로 삽입할 세운 텍스트 블록.
+export function formatSaeunForPrompt(bazi, saeun) {
+  if (!saeun.ok) return "";
+  const lines = [
+    "[검증된 세운(歲運) 계산 결과 — 아래 연간 간지·십신은 이미 정확히 계산된 것이므로 그대로 인용하고, 절대 직접 다시 계산하거나 다른 간지를 만들어내지 마세요]",
+    `- 이 사람의 일간(본인 기준): ${bazi.dayMaster.gan}(${bazi.dayMaster.ganHanja}), 오행 ${bazi.dayMaster.wuxing}`,
+    `- ${saeun.year}년 세운: ${saeun.pillar.ganZhiKo}(${saeun.pillar.ganZhiHanja}) · 오행 ${saeun.pillar.ganWuxing}+${saeun.pillar.zhiWuxing} · 본인 일간 기준 십신=${saeun.tenGod}`,
+  ];
+  return lines.join("\n");
+}
+
 // Claude 프롬프트에 그대로 삽입할 대운 텍스트 블록. cycles만 해당 시기(초년/중년/말년)로 걸러서 넘긴다.
 export function formatDaewoonForPrompt(bazi, daewoon, cycles) {
   if (!daewoon.ok) return "";

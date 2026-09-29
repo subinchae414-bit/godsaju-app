@@ -3,8 +3,9 @@ import { RELATION_ICON, initial } from "../personDisplay.js";
 
 const TARGETS = {
   saju: { title: "사주보기", hrefFor: (id) => `#/person/${id}/saju` },
-  today: { title: "오늘의 운세", hrefFor: (id) => `#/person/${id}/fortune/today` },
+  saeun: { title: "세운(연운)", hrefFor: (id) => `#/person/${id}/saeun/current` },
   daewoon: { title: "대운", hrefFor: (id) => `#/person/${id}/daewoon/early` },
+  redthread: { title: "붉은 실 만들기", hrefFor: (id) => `#/person/${id}/redthread` },
 };
 
 export async function renderPickPerson(container, { target } = {}) {
