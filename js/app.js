@@ -1,4 +1,5 @@
 import { renderHome } from "./views/home.js";
+import { renderPickPerson } from "./views/pickPerson.js";
 import { renderPersonForm } from "./views/personForm.js";
 import { renderSaju } from "./views/saju.js";
 import { renderCompat } from "./views/compat.js";
@@ -123,6 +124,8 @@ async function route() {
     await renderFortune(contentHost, { id: second, range: fourth });
   } else if (first === "person" && second && third === "daewoon") {
     await renderDaewoon(contentHost, { id: second, phase: fourth });
+  } else if (first === "pick") {
+    await renderPickPerson(contentHost, { target: second });
   } else if (first === "compat") {
     await renderCompat(contentHost);
   } else if (first === "settings") {
