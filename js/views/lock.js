@@ -10,10 +10,13 @@ export function renderLock(container, onUnlock) {
 
   container.innerHTML = `
     <div class="page" style="padding-top:56px;">
-      <div style="text-align:center;margin-bottom:26px;">
+      <div style="text-align:center;margin-bottom:18px;">
         <div style="font-size:48px;">🐶</div>
         <h2 style="margin:10px 0 6px;">사주풀이</h2>
-        <div class="hint" style="font-size:13.5px;">
+      </div>
+
+      <div class="card" style="margin-bottom:18px;">
+        <div class="hint" style="font-size:13.5px;margin-top:0;">
           가족·연인과 함께 쓸 PIN(비밀번호)을 입력하세요.<br/>
           같은 PIN을 입력하면 어떤 기기에서든 같은 사람 목록과 사주 풀이를 볼 수 있어요.
         </div>
@@ -30,9 +33,11 @@ export function renderLock(container, onUnlock) {
 
       <button class="btn btn-primary" id="lock-submit">입장하기</button>
 
-      <div class="hint" style="margin-top:16px;">
-        처음 쓰는 PIN이면 새로운 공간이 자동으로 만들어져요.<br/>
-        PIN을 잊어버리면 그 공간의 데이터에는 다시 접근할 수 없으니 꼭 기억해두세요. (비밀번호 찾기 기능은 없어요)
+      <div class="card" style="margin-top:16px;">
+        <div class="hint" style="margin-top:0;">
+          처음 쓰는 PIN이면 새로운 공간이 자동으로 만들어져요.<br/>
+          PIN을 잊어버리면 그 공간의 데이터에는 다시 접근할 수 없으니 꼭 기억해두세요. (비밀번호 찾기 기능은 없어요)
+        </div>
       </div>
     </div>
   `;

@@ -7,6 +7,8 @@ import {
   formatBaziForPrompt,
   computeFortuneDays,
   formatFortuneForPrompt,
+  computeSaeun,
+  formatSaeunForPrompt,
   computeDaewoon,
   formatDaewoonForPrompt,
   computeShinsal,
@@ -21,6 +23,12 @@ import {
 export const FORTUNE_RANGES = {
   today: { days: 1, startOffset: 0, label: "오늘 운세" },
   tomorrow: { days: 1, startOffset: 1, label: "내일 운세" },
+};
+
+// 연운(세운/歲運): 한 해 전체의 흐름. yearOffset은 올해 기준 몇 년 뒤인지.
+export const SAEUN_RANGES = {
+  current: { yearOffset: 0, label: "올해 연운" },
+  next: { yearOffset: 1, label: "내년 연운" },
 };
 
 // 대운을 세 시기로 나눠서 보여준다. 각 대운은 10년 단위라 나이 구간이 시기 경계에 걸칠 수 있는데,
@@ -121,6 +129,51 @@ export function buildFortunePrompt(person, rangeKey) {
 ## 힘이 되는 조언 (2~3문장)`;
 
   const user = `다음 사람의 ${range.label}를 봐주세요.\n\n${describePerson(person)}\n\n${formatBaziForPrompt(bazi)}\n\n${formatFortuneForPrompt(bazi, fortune)}`;
+  return { system, user };
+}
+
+// rangeKey: "current" | "next" (SAEUN_RANGES 참고)
+export function buildSaeunPrompt(person, rangeKey) {
+  const range = SAEUN_RANGES[rangeKey];
+  if (!range) {
+    throw new Error("알 수 없는 연운 연도예요.");
+  }
+
+  const bazi = requireBazi(person);
+  const year = new Date().getFullYear() + range.yearOffset;
+  const saeun = computeSaeun(bazi, year);
+  if (!saeun.ok) {
+    throw new Error(`${person.name}님의 연운을 계산하지 못했어요: ${saeun.error}`);
+  }
+
+  const system = `${BASE_SYSTEM}
+
+지금은 "${year}년 연운(年運)"을 해석하는 요청입니다. 연운은 대운(10년 단위)과 달리 한 해 전체의 흐름을 나타냅니다. 사용자 메시지에는 이 사람의 사주 원국(연/월/일/시주, 일간)과, ${year}년의 연간(年干) 연운 간지·오행·십신이 이미 정확히 계산되어 포함되어 있습니다. 이 연운이 본인 일간과 어떤 십신 관계인지를 바탕으로 ${year}년 한 해의 전반적인 흐름을 해석하세요. "세운"이라는 표현은 쓰지 말고 "연운"으로만 표현하세요. 아래 구성을 따르세요.
+## ${year}년 연운 총운
+## 이 해에 주의할 점
+## 힘이 되는 조언 (2~3문장)`;
+
+  const user = `다음 사람의 ${year}년 연운을 봐주세요.\n\n${describePerson(person)}\n\n${formatBaziForPrompt(bazi)}\n\n${formatSaeunForPrompt(bazi, saeun)}`;
+  return { system, user };
+}
+
+// "붉은 실 만들기": 이 사람과 명리학적으로 잘 맞을 만한 이상적인 인연 유형 TOP 10을 추천.
+// 실존 인물이나 구체적인 생년월일을 지어내지 않고, 오행/십신 성향 중심의 "인연 유형"을 설명한다.
+export function buildRedThreadPrompt(person) {
+  const bazi = requireBazi(person);
+
+  const system = `${BASE_SYSTEM}
+
+지금은 "붉은 실 만들기" 요청입니다. 이 사람의 사주(오행 분포, 일간, 십신 성향)를 바탕으로, 명리학적으로 보완·상생 관계에 있어 잘 맞을 가능성이 높은 "이상적인 인연 유형"을 순위별로 추천해주세요.
+- 실제 존재하는 특정 인물이나 구체적인 생년월일을 지어내지 마세요. 대신 "이런 오행/기질/십신 성향을 가진 사람"이라는 식으로 유형을 설명하세요.
+- 순위가 높을수록(1위에 가까울수록) 이 사람과 더 잘 맞는 조합이어야 하고, 10개 유형은 서로 겹치지 않게 다양해야 합니다.
+- 아래 구성을 마크다운으로 작성하세요.
+## 이 사람의 인연운 요약 (오행 균형과 보완이 필요한 기운 중심으로 2~3문장)
+## 나와 잘 맞는 인연 TOP 10
+(1위부터 10위까지 - 목록으로 작성. 각 항목은 "**N위. [한 줄 캐릭터 설명]**" 형식의 제목으로 시작하고, 이어서 어떤 오행·십신 기운을 가진 사람인지와 왜 잘 맞는지를 1~2문장으로 설명)
+## 인연을 알아볼 때 참고할 팁 (2~3문장)`;
+
+  const user = `다음 사람과 사주명리학적으로 잘 맞는 이상적인 인연 유형 TOP 10을 뽑아주세요.\n\n${describePerson(person)}\n\n${formatBaziForPrompt(bazi)}`;
   return { system, user };
 }
 
