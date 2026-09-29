@@ -3,7 +3,7 @@ import { RELATION_ICON, initial } from "../personDisplay.js";
 
 const TARGETS = {
   saju: { title: "사주보기", hrefFor: (id) => `#/person/${id}/saju` },
-  saeun: { title: "세운(연운)", hrefFor: (id) => `#/person/${id}/saeun/current` },
+  saeun: { title: "연운", hrefFor: (id) => `#/person/${id}/saeun/current` },
   daewoon: { title: "대운", hrefFor: (id) => `#/person/${id}/daewoon/early` },
   redthread: { title: "붉은 실 만들기", hrefFor: (id) => `#/person/${id}/redthread` },
 };

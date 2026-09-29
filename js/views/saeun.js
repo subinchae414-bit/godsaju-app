@@ -15,7 +15,7 @@ function renderSaeunCard(saeun) {
   }
   return `
     <div class="card bazi-card">
-      <div class="section-title" style="margin:0 0 10px;">${saeun.year}년 세운(歲運) 🐾</div>
+      <div class="section-title" style="margin:0 0 10px;">${saeun.year}년 연운(年運) 🐾</div>
       <div class="pillar-grid" style="grid-template-columns:1fr;">
         <div class="pillar-cell">
           <div class="pillar-label">${saeun.year}년</div>
@@ -33,7 +33,7 @@ export async function renderSaeun(container, { id, range }) {
   container.innerHTML = `<div class="page"><div class="loading-row"><div class="spinner"></div> 불러오는 중...</div></div>`;
 
   if (!rangeInfo) {
-    container.innerHTML = `<div class="page"><div class="error-box">알 수 없는 세운 연도예요.</div></div>`;
+    container.innerHTML = `<div class="page"><div class="error-box">알 수 없는 연운 연도예요.</div></div>`;
     return;
   }
 
@@ -97,7 +97,7 @@ export async function renderSaeun(container, { id, range }) {
     return;
   }
 
-  area.innerHTML = `<div class="loading-row"><div class="spinner"></div> 저장된 세운을 확인하고 있어요...</div>`;
+  area.innerHTML = `<div class="loading-row"><div class="spinner"></div> 저장된 연운을 확인하고 있어요...</div>`;
   let cached = null;
   try {
     cached = await getCachedReading(cacheKey);
@@ -123,7 +123,7 @@ export async function renderSaeun(container, { id, range }) {
 
   async function runReading() {
     regenRow.style.display = "none";
-    area.innerHTML = `<div class="loading-row"><div class="spinner"></div> 세운을 풀이하고 있어요...</div>`;
+    area.innerHTML = `<div class="loading-row"><div class="spinner"></div> 연운을 풀이하고 있어요...</div>`;
 
     let acc = "";
 

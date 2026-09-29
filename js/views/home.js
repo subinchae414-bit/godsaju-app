@@ -86,8 +86,8 @@ export async function renderHome(container) {
           <div class="dog-menu-sub">우리 사이는 몇 점?</div>
         </a>
         <a class="dog-menu-card dog-menu-blue" href="${saeunHref}" data-menu="saeun">
-          <img class="dog-menu-photo" src="./img/dogs/encourage.jpg" alt="세운보기" />
-          <div class="dog-menu-title">세운(연운) 🐾</div>
+          <img class="dog-menu-photo" src="./img/dogs/encourage.jpg" alt="연운보기" />
+          <div class="dog-menu-title">연운 🐾</div>
           <div class="dog-menu-sub">올해는 어떤 기운이 흐를까?</div>
         </a>
         <a class="dog-menu-card dog-menu-purple" href="${daewoonHref}" data-menu="daewoon">
@@ -104,9 +104,8 @@ export async function renderHome(container) {
         <a class="keycap keycap-img" href="#/compat" data-menu="compat">
           <img src="./img/keycaps/gunghap.webp" alt="궁합보기" />
         </a>
-        <a class="keycap keycap-plain" href="${saeunHref}" data-menu="saeun">
-          <span class="keycap-plain-emoji">🍇⭐</span>
-          <span class="keycap-plain-label">세운(연운)</span>
+        <a class="keycap keycap-img" href="${saeunHref}" data-menu="saeun">
+          <img src="./img/keycaps/today.webp" alt="연운" />
         </a>
         <a class="keycap keycap-img" href="${daewoonHref}" data-menu="daewoon">
           <img src="./img/keycaps/daewoon.webp" alt="대운" />

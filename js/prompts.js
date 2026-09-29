@@ -25,10 +25,10 @@ export const FORTUNE_RANGES = {
   tomorrow: { days: 1, startOffset: 1, label: "내일 운세" },
 };
 
-// 세운(歲運): 한 해 전체의 흐름. yearOffset은 올해 기준 몇 년 뒤인지.
+// 연운(세운/歲運): 한 해 전체의 흐름. yearOffset은 올해 기준 몇 년 뒤인지.
 export const SAEUN_RANGES = {
-  current: { yearOffset: 0, label: "올해 세운" },
-  next: { yearOffset: 1, label: "내년 세운" },
+  current: { yearOffset: 0, label: "올해 연운" },
+  next: { yearOffset: 1, label: "내년 연운" },
 };
 
 // 대운을 세 시기로 나눠서 보여준다. 각 대운은 10년 단위라 나이 구간이 시기 경계에 걸칠 수 있는데,
@@ -136,24 +136,24 @@ export function buildFortunePrompt(person, rangeKey) {
 export function buildSaeunPrompt(person, rangeKey) {
   const range = SAEUN_RANGES[rangeKey];
   if (!range) {
-    throw new Error("알 수 없는 세운 연도예요.");
+    throw new Error("알 수 없는 연운 연도예요.");
   }
 
   const bazi = requireBazi(person);
   const year = new Date().getFullYear() + range.yearOffset;
   const saeun = computeSaeun(bazi, year);
   if (!saeun.ok) {
-    throw new Error(`${person.name}님의 세운을 계산하지 못했어요: ${saeun.error}`);
+    throw new Error(`${person.name}님의 연운을 계산하지 못했어요: ${saeun.error}`);
   }
 
   const system = `${BASE_SYSTEM}
 
-지금은 "${year}년 세운(歲運)"을 해석하는 요청입니다. 세운은 대운(10년 단위)과 달리 한 해 전체의 흐름을 나타냅니다. 사용자 메시지에는 이 사람의 사주 원국(연/월/일/시주, 일간)과, ${year}년의 연간(年干) 세운 간지·오행·십신이 이미 정확히 계산되어 포함되어 있습니다. 이 세운이 본인 일간과 어떤 십신 관계인지를 바탕으로 ${year}년 한 해의 전반적인 흐름을 해석하세요. 아래 구성을 따르세요.
-## ${year}년 세운 총운
+지금은 "${year}년 연운(年運)"을 해석하는 요청입니다. 연운은 대운(10년 단위)과 달리 한 해 전체의 흐름을 나타냅니다. 사용자 메시지에는 이 사람의 사주 원국(연/월/일/시주, 일간)과, ${year}년의 연간(年干) 연운 간지·오행·십신이 이미 정확히 계산되어 포함되어 있습니다. 이 연운이 본인 일간과 어떤 십신 관계인지를 바탕으로 ${year}년 한 해의 전반적인 흐름을 해석하세요. "세운"이라는 표현은 쓰지 말고 "연운"으로만 표현하세요. 아래 구성을 따르세요.
+## ${year}년 연운 총운
 ## 이 해에 주의할 점
 ## 힘이 되는 조언 (2~3문장)`;
 
-  const user = `다음 사람의 ${year}년 세운을 봐주세요.\n\n${describePerson(person)}\n\n${formatBaziForPrompt(bazi)}\n\n${formatSaeunForPrompt(bazi, saeun)}`;
+  const user = `다음 사람의 ${year}년 연운을 봐주세요.\n\n${describePerson(person)}\n\n${formatBaziForPrompt(bazi)}\n\n${formatSaeunForPrompt(bazi, saeun)}`;
   return { system, user };
 }
 
