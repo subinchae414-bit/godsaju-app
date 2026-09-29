@@ -65,14 +65,6 @@ export async function renderHome(container) {
 
   container.innerHTML = `
     <div class="page">
-      <div class="hero-banner">
-        <img class="hero-bg-photo" src="./img/dogs/main.jpg" alt="사주풀이 마스코트 강아지" />
-        <div class="speech-bubble hero-speech">
-          <div>어서와멍! 🐾</div>
-          <div>키캡을 눌러봐라멍!</div>
-        </div>
-      </div>
-
       <div class="keycap-grid">
         <a class="keycap keycap-img" href="${sajuHref}" data-menu="saju">
           <img src="./img/keycaps/saju.webp" alt="사주보기" />
