@@ -62,7 +62,6 @@ export async function renderHome(container) {
   const sajuHref = personHref("/saju");
   const daewoonHref = personHref("/daewoon/early");
   const todayHref = personHref("/fortune/today");
-  const tomorrowHref = personHref("/fortune/tomorrow");
 
   container.innerHTML = `
     <div class="page">
@@ -75,25 +74,21 @@ export async function renderHome(container) {
       </div>
 
       <div class="keycap-grid">
-        <a class="keycap keycap-mint" href="${sajuHref}" data-menu="saju">
-          <span class="keycap-fruit">🍒</span>
-          <span class="keycap-label">사주보기</span>
+        <a class="keycap keycap-sky" href="${sajuHref}" data-menu="saju">
+          <span class="keycap-fruit">💗⭐</span>
+          <span class="keycap-caption"><span class="keycap-caption-icon">★</span><span class="keycap-label">사주보기</span></span>
         </a>
         <a class="keycap keycap-pink" href="#/compat" data-menu="compat">
-          <span class="keycap-fruit">🍓</span>
-          <span class="keycap-label">궁합보기</span>
+          <span class="keycap-fruit">🍒💗</span>
+          <span class="keycap-caption"><span class="keycap-caption-icon">♡</span><span class="keycap-label">궁합보기</span></span>
         </a>
         <a class="keycap keycap-yellow" href="${todayHref}" data-menu="today">
-          <span class="keycap-fruit">🍋</span>
-          <span class="keycap-label">오늘운세</span>
+          <span class="keycap-fruit">🍉🍋</span>
+          <span class="keycap-caption"><span class="keycap-caption-icon">☀</span><span class="keycap-label">오늘의 운세</span></span>
         </a>
-        <a class="keycap keycap-lavender" href="${tomorrowHref}" data-menu="tomorrow">
-          <span class="keycap-fruit">🍇</span>
-          <span class="keycap-label">내일운세</span>
-        </a>
-        <a class="keycap keycap-sky" href="${daewoonHref}" data-menu="daewoon">
-          <span class="keycap-fruit">🍉</span>
-          <span class="keycap-label">대운보기</span>
+        <a class="keycap keycap-lavender" href="${daewoonHref}" data-menu="daewoon">
+          <span class="keycap-fruit">☁️⭐</span>
+          <span class="keycap-caption"><span class="keycap-caption-icon">∞</span><span class="keycap-label">대운</span></span>
         </a>
       </div>
 
