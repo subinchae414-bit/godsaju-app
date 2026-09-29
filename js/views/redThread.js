@@ -31,6 +31,11 @@ export async function renderRedThread(container, { id }) {
   container.innerHTML = `
     <div class="page">
       <a href="#/person/${id}/saju" class="back-link">‹ ${person.name}님 사주로</a>
+
+      <div class="redthread-hero-banner">
+        <img class="redthread-hero-photo" src="./img/redthread-hero.webp" alt="붉은 실로 이어진 인연" />
+      </div>
+
       <div class="reading-header">
         <div class="person-avatar-wrap">
           <div class="person-avatar">${initial(person.name)}</div>

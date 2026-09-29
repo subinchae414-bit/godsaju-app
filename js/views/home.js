@@ -114,7 +114,7 @@ export async function renderHome(container) {
 
   const redThreadHtml = `
     <a class="redthread-banner" href="${redThreadHref}" data-menu="redthread">
-      <span class="redthread-icon">🧵</span>
+      <img class="redthread-icon" src="./img/redthread-icon.webp" alt="붉은 실 만들기" />
       <span class="redthread-text">
         <span class="redthread-title">붉은 실 만들기</span>
         <span class="redthread-sub">나와 잘 맞는 인연 TOP 10 찾기</span>
