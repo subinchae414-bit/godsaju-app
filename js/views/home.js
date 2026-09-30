@@ -66,6 +66,11 @@ export async function renderHome(container) {
           <div class="dog-menu-title">대운 보기 🐾</div>
           <div class="dog-menu-sub">물 들어올 때 노 젓자</div>
         </a>
+        <a class="dog-menu-card dog-menu-pink" href="${redThreadHref}" data-menu="redthread">
+          <img class="dog-menu-photo" src="./img/redthread-icon-dog.webp" alt="붉은 실 만들기" />
+          <div class="dog-menu-title">붉은 실 만들기 🐾</div>
+          <div class="dog-menu-sub">나와 잘 맞는 인연 TOP 10 찾기</div>
+        </a>
       </div>`
     : `
       <div class="keycap-grid">
@@ -81,25 +86,16 @@ export async function renderHome(container) {
         <a class="keycap keycap-img" href="${daewoonHref}" data-menu="daewoon">
           <img src="./img/keycaps/daewoon.webp" alt="대운" />
         </a>
+        <a class="keycap keycap-img" href="${redThreadHref}" data-menu="redthread">
+          <img src="./img/redthread-icon-fruit.webp" alt="붉은 실 만들기" />
+          <span class="keycap-overlay-label">붉은 실 <span class="keycap-overlay-chevron">›</span></span>
+        </a>
       </div>`;
-
-  const redThreadIconSrc = isDogTheme ? "./img/redthread-icon-dog.webp" : "./img/redthread-icon-fruit.webp";
-
-  const redThreadHtml = `
-    <a class="redthread-banner" href="${redThreadHref}" data-menu="redthread">
-      <img class="redthread-icon" src="${redThreadIconSrc}" alt="붉은 실 만들기" />
-      <span class="redthread-text">
-        <span class="redthread-title">붉은 실 만들기</span>
-        <span class="redthread-sub">나와 잘 맞는 인연 TOP 10 찾기</span>
-      </span>
-      <span class="chevron">›</span>
-    </a>`;
 
   container.innerHTML = `
     <div class="page">
       ${heroHtml}
       ${keycapGridHtml}
-      ${redThreadHtml}
       ${emptyStateHtml}
     </div>
     <button class="fab" id="add-person-fab" aria-label="사람 추가">＋</button>
@@ -109,7 +105,7 @@ export async function renderHome(container) {
     location.hash = "#/person/new";
   });
 
-  container.querySelectorAll(".keycap, .dog-menu-card, .redthread-banner").forEach((keycap) => {
+  container.querySelectorAll(".keycap, .dog-menu-card").forEach((keycap) => {
     keycap.addEventListener("click", () => playKeycapClick());
   });
 }
