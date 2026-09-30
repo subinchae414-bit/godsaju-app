@@ -228,10 +228,10 @@ button {
 .redthread-banner {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   margin-top: 14px;
-  padding: 14px 16px;
-  border-radius: 20px;
+  padding: 12px 16px;
+  border-radius: 22px;
   background: linear-gradient(135deg, #ffe3e9, #fff0e6);
   border: 2px solid var(--pastel-pink-deep);
   box-shadow: 0 6px 14px rgba(255, 120, 150, 0.18);
@@ -244,12 +244,13 @@ button {
 }
 
 .redthread-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
+  width: 68px;
+  height: 68px;
+  border-radius: 18px;
   object-fit: cover;
   flex-shrink: 0;
-  border: 2px solid rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5), 0 4px 12px rgba(255, 100, 140, 0.35);
 }
 
 .redthread-text {
@@ -259,7 +260,7 @@ button {
 }
 
 .redthread-title {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
 }
 
