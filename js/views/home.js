@@ -1,6 +1,5 @@
-import { getPeople, RELATIONS } from "../storage.js";
+import { getPeople } from "../storage.js";
 import { playKeycapClick } from "../clickSound.js";
-import { RELATION_ICON, initial } from "../personDisplay.js";
 import { getTheme } from "../theme.js";
 
 export async function renderHome(container) {
@@ -14,40 +13,12 @@ export async function renderHome(container) {
     return;
   }
 
-  const grouped = RELATIONS.map((rel) => ({
-    rel,
-    people: people.filter((p) => p.relation === rel),
-  })).filter((g) => g.people.length > 0);
-
-  const listHtml =
+  const emptyStateHtml =
     people.length === 0
-      ? `<div class="empty-state">아직 등록된 사람이 없어요.<br/>오른쪽 아래 + 버튼으로 첫 프로필을 추가해보세요.</div>`
-      : grouped
-          .map(
-            (g) => `
-        <div class="section-title">${RELATION_ICON[g.rel] || ""} ${g.rel}</div>
-        <div class="person-list">
-          ${g.people
-            .map(
-              (p) => `
-            <a class="person-row" href="#/person/${p.id}/saju" data-id="${p.id}">
-              <div class="person-avatar-wrap">
-                <div class="person-avatar">${initial(p.name)}</div>
-                <div class="paw-badge">🐾</div>
-              </div>
-              <div class="person-info">
-                <div class="person-name">${p.name}</div>
-                <div class="person-meta">${p.birthDate} · ${p.calendarType === "lunar" ? "음력" : "양력"}${
-                p.timeUnknown ? "" : p.birthTime ? " · " + p.birthTime : ""
-              }</div>
-              </div>
-              <div class="chevron">›</div>
-            </a>`
-            )
-            .join("")}
-        </div>`
-          )
-          .join("");
+      ? `
+        <div class="section-title" style="margin-top:18px;">우리 아이들</div>
+        <div class="empty-state">아직 등록된 사람이 없어요.<br/>오른쪽 아래 + 버튼으로 첫 프로필을 추가해보세요.</div>`
+      : "";
 
   const personHref = (target, suffix) => {
     if (people.length === 0) return "#/person/new";
@@ -127,9 +98,7 @@ export async function renderHome(container) {
       ${heroHtml}
       ${keycapGridHtml}
       ${redThreadHtml}
-
-      <div class="section-title" style="margin-top:18px;">우리 아이들</div>
-      ${listHtml}
+      ${emptyStateHtml}
     </div>
     <button class="fab" id="add-person-fab" aria-label="사람 추가">＋</button>
   `;
