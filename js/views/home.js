@@ -83,9 +83,11 @@ export async function renderHome(container) {
         </a>
       </div>`;
 
+  const redThreadIconSrc = isDogTheme ? "./img/redthread-icon-dog.webp" : "./img/redthread-icon-fruit.webp";
+
   const redThreadHtml = `
     <a class="redthread-banner" href="${redThreadHref}" data-menu="redthread">
-      <img class="redthread-icon" src="./img/redthread-icon.webp" alt="붉은 실 만들기" />
+      <img class="redthread-icon" src="${redThreadIconSrc}" alt="붉은 실 만들기" />
       <span class="redthread-text">
         <span class="redthread-title">붉은 실 만들기</span>
         <span class="redthread-sub">나와 잘 맞는 인연 TOP 10 찾기</span>
